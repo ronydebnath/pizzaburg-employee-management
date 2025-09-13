@@ -152,7 +152,7 @@
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                         <div class="px-6 py-4 border-b border-gray-200">
                             <h2 class="text-lg font-semibold text-gray-900">Profile Photo</h2>
-                            <p class="text-sm text-gray-600 mt-1">Upload your profile photo or take a selfie</p>
+                            <p class="text-sm text-gray-600 mt-1">Upload your profile photo</p>
                         </div>
                         <div class="px-6 py-4">
                             <!-- Photo Upload Options -->
@@ -165,60 +165,6 @@
                                 </div>
                                 
                                 <!-- OR Divider -->
-                                <div class="relative">
-                                    <div class="absolute inset-0 flex items-center">
-                                        <div class="w-full border-t border-gray-300" />
-                                    </div>
-                                    <div class="relative flex justify-center text-sm">
-                                        <span class="px-2 bg-white text-gray-500">OR</span>
-                                    </div>
-                                </div>
-                                
-                                <!-- Camera Section -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Take Selfie</label>
-                                    
-                                    <!-- Camera Preview -->
-                                    <div class="relative mb-4">
-                                        <video id="video" width="400" height="300" class="w-full max-w-md mx-auto border border-gray-300 rounded-lg hidden" autoplay muted></video>
-                                        <canvas id="canvas" width="400" height="300" class="hidden"></canvas>
-                                    </div>
-
-                                    <!-- Camera Controls -->
-                                    <div class="flex flex-col items-center space-y-4">
-                                        <div class="flex space-x-4">
-                                            <button type="button" id="startCamera" 
-                                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                </svg>
-                                                Start Camera
-                                            </button>
-                                            
-                                            <button type="button" id="takeSelfie" 
-                                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                                    disabled>
-                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                </svg>
-                                                Take Selfie
-                                            </button>
-                                        </div>
-
-                                        <!-- Selfie Preview -->
-                                        <div id="selfiePreview" class="hidden">
-                                            <img id="selfieImage" class="w-64 h-48 object-cover border border-gray-300 rounded-lg" alt="Captured selfie">
-                                            <div class="mt-4 flex space-x-4">
-                                                <button type="button" id="retakeSelfie" 
-                                                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                    Retake
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -278,56 +224,9 @@
     </div>
 
     <script>
-        let stream = null;
-        let capturedImage = null;
 
         document.addEventListener('DOMContentLoaded', function() {
-            const video = document.getElementById('video');
-            const canvas = document.getElementById('canvas');
-            const startCameraBtn = document.getElementById('startCamera');
-            const takeSelfieBtn = document.getElementById('takeSelfie');
-            const retakeSelfieBtn = document.getElementById('retakeSelfie');
-            const submitSelfieBtn = document.getElementById('submitSelfie');
-            const selfiePreview = document.getElementById('selfiePreview');
-            const selfieImage = document.getElementById('selfieImage');
             const processingStatus = document.getElementById('processingStatus');
-
-            // Start camera
-            startCameraBtn.addEventListener('click', async function() {
-                try {
-                    stream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { 
-                            width: 400, 
-                            height: 300,
-                            facingMode: 'user' // Front camera
-                        } 
-                    });
-                    video.srcObject = stream;
-                    takeSelfieBtn.disabled = false;
-                    startCameraBtn.textContent = 'Camera Active';
-                    startCameraBtn.disabled = true;
-                } catch (error) {
-                    alert('Error accessing camera: ' + error.message);
-                }
-            });
-
-            // Take selfie
-            takeSelfieBtn.addEventListener('click', function() {
-                const context = canvas.getContext('2d');
-                context.drawImage(video, 0, 0, 400, 300);
-                capturedImage = canvas.toDataURL('image/jpeg', 0.8);
-                
-                selfieImage.src = capturedImage;
-                selfiePreview.classList.remove('hidden');
-                video.style.display = 'none';
-            });
-
-            // Retake selfie
-            retakeSelfieBtn.addEventListener('click', function() {
-                selfiePreview.classList.add('hidden');
-                video.style.display = 'block';
-                capturedImage = null;
-            });
 
             // Form submission
             document.getElementById('kycForm').addEventListener('submit', function(e) {
@@ -351,12 +250,10 @@
                 formData.append('verification_id', '{{ $verification->verification_id }}');
                 formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
                 
-                // Add profile photo (file upload or selfie)
+                // Add profile photo (file upload only)
                 const profilePhoto = document.getElementById('profile_photo').files[0];
                 if (profilePhoto) {
                     formData.append('profile_photo', profilePhoto);
-                } else if (capturedImage) {
-                    formData.append('selfie', capturedImage);
                 }
 
                 fetch('{{ route("kyc.verify", $invite->token) }}', {

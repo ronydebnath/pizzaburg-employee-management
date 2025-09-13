@@ -15,6 +15,7 @@ class EmploymentContract extends Model
         'template_key',
         'status',
         'contract_data',
+        'contract_file_path',
         'signature_file_path',
         'signed_pdf_path',
         'sent_at',

@@ -90,16 +90,12 @@ class ViewKycVerification extends ViewRecord
                             ->disk('private')
                             ->height(200)
                             ->placeholder('No profile image uploaded')
-                            ->extraAttributes(['class' => 'rounded-lg']),
+                            ->extraAttributes(['class' => 'rounded-lg cursor-pointer'])
+                            ->url(fn ($record) => $record->profile_image_path ? route('private.file', ['path' => $record->profile_image_path]) : null)
+                            ->openUrlInNewTab(),
                         
-                        Infolists\Components\ImageEntry::make('selfie_image_path')
-                            ->label('Selfie Image')
-                            ->disk('private')
-                            ->height(200)
-                            ->placeholder('No selfie image uploaded')
-                            ->extraAttributes(['class' => 'rounded-lg']),
                     ])
-                    ->columns(2),
+                    ->columns(1),
                 
                 Infolists\Components\Section::make('Verification Data')
                     ->schema([

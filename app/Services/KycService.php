@@ -47,9 +47,6 @@ class KycService
             if (isset($data['profile_photo']) && $data['profile_photo']) {
                 $profileImagePath = $this->saveProfileImage($verification, $data['profile_photo']);
                 $profileData['profile_image_path'] = $profileImagePath;
-            } elseif (isset($data['selfie']) && $data['selfie']) {
-                $selfiePath = $this->saveSelfieImage($verification, $data['selfie']);
-                $profileData['selfie_image_path'] = $selfiePath;
             }
 
             // Update verification with profile data
@@ -165,31 +162,6 @@ class KycService
         return $path;
     }
 
-    /**
-     * Save selfie image from base64 data
-     */
-    private function saveSelfieImage(KycVerification $verification, string $selfieData): string
-    {
-        // Remove data URL prefix if present
-        if (strpos($selfieData, 'data:image') === 0) {
-            $selfieData = substr($selfieData, strpos($selfieData, ',') + 1);
-        }
-
-        // Decode base64 data
-        $imageData = base64_decode($selfieData);
-
-        if ($imageData === false) {
-            throw new \Exception('Invalid selfie image data');
-        }
-
-        // Generate filename
-        $filename = 'kyc/selfies/' . $verification->verification_id . '_selfie.jpg';
-
-        // Save to storage
-        Storage::put($filename, $imageData);
-
-        return $filename;
-    }
 
     /**
      * Perform liveness detection (simplified implementation)

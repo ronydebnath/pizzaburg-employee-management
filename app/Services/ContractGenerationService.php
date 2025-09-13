@@ -34,13 +34,13 @@ class ContractGenerationService
                 'employee_name' => $invite->full_name,
                 'employee_email' => $invite->email,
                 'employee_phone' => $invite->phone,
-                'branch_name' => $invite->branch->name,
-                'branch_address' => $invite->branch->address,
-                'position_name' => $invite->position->name,
-                'position_grade' => $invite->position->grade,
-                'start_date' => $invite->joining_date->format('M d, Y'),
+                'branch_name' => $invite->branch?->name ?? 'N/A',
+                'branch_address' => $invite->branch?->address ?? 'N/A',
+                'position_name' => $invite->position?->name ?? 'N/A',
+                'position_grade' => $invite->position?->grade ?? 'N/A',
+                'start_date' => $contract->contract_data['start_date'] ?? now()->format('M d, Y'),
                 'generated_date' => now()->format('M d, Y'),
-                'salary' => $invite->position->salary ?? 'As per company policy',
+                'salary' => $invite->position?->salary ?? 'As per company policy',
             ], $contract->contract_data ?? []);
             
             // Render template content with data
@@ -51,6 +51,9 @@ class ContractGenerationService
             
             // Save PDF to storage
             $pdfPath = $this->savePdf($contract, $pdfContent);
+            
+            // Update contract with file path
+            $contract->update(['contract_file_path' => $pdfPath]);
             
             Log::info('Contract PDF generated from template', [
                 'contract_id' => $contract->id,
@@ -89,12 +92,12 @@ class ContractGenerationService
                 'employee_name' => $invite->full_name,
                 'employee_email' => $invite->email,
                 'employee_phone' => $invite->phone,
-                'branch_name' => $invite->branch->name,
-                'branch_address' => $invite->branch->address,
-                'position_name' => $invite->position->name,
-                'position_grade' => $invite->position->grade,
+                'branch_name' => $invite->branch?->name ?? 'N/A',
+                'branch_address' => $invite->branch?->address ?? 'N/A',
+                'position_name' => $invite->position?->name ?? 'N/A',
+                'position_grade' => $invite->position?->grade ?? 'N/A',
                 'generated_date' => now()->format('M d, Y'),
-                'signed_date' => $contract->signed_at->format('M d, Y'),
+                'signed_date' => $contract->signed_at?->format('M d, Y') ?? now()->format('M d, Y'),
                 'signature_image' => $contract->signature_file_path,
             ], $contract->contract_data ?? []);
             

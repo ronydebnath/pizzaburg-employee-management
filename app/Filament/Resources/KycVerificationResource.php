@@ -100,13 +100,8 @@ class KycVerificationResource extends Resource
                             ->directory('kyc/profiles')
                             ->visibility('private'),
                         
-                        Forms\Components\FileUpload::make('selfie_image_path')
-                            ->label('Selfie Image')
-                            ->image()
-                            ->directory('kyc/selfies')
-                            ->visibility('private'),
                     ])
-                    ->columns(2),
+                    ->columns(1),
                 
                 Forms\Components\Section::make('Review Notes')
                     ->schema([

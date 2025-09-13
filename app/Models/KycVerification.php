@@ -17,7 +17,6 @@ class KycVerification extends Model
         'type',
         'verification_data',
         'result_data',
-        'selfie_image_path',
         'document_image_path',
         'rejection_reason',
         'verified_at',
@@ -57,10 +56,6 @@ class KycVerification extends Model
         return $this->belongsTo(OnboardingInvite::class);
     }
 
-    public function getSelfieUrlAttribute(): ?string
-    {
-        return $this->selfie_image_path ? Storage::url($this->selfie_image_path) : null;
-    }
 
     public function getDocumentUrlAttribute(): ?string
     {

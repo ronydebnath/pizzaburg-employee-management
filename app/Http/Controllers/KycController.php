@@ -91,7 +91,6 @@ class KycController extends Controller
                 'emergency_contact_phone' => 'required|string|max:20',
                 'verification_id' => 'required|string',
                 'profile_photo' => 'nullable|image|max:2048',
-                'selfie' => 'nullable|string',
             ]);
 
             // Find the onboarding invite

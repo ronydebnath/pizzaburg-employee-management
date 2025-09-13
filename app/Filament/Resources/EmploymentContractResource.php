@@ -285,15 +285,32 @@ class EmploymentContractResource extends Resource
                 Tables\Actions\Action::make('generate_contract')
                     ->icon('heroicon-o-document')
                     ->color('info')
-                    ->requiresConfirmation()
-                    ->modalHeading('Generate Contract')
-                    ->modalDescription('Generate contract PDF from template and send to employee?')
+                    ->label(fn (EmploymentContract $record): string => 
+                        $record->contract_file_path ? 'View Contract' : 'Generate Contract'
+                    )
+                    ->requiresConfirmation(fn (EmploymentContract $record): bool => !$record->contract_file_path)
+                    ->modalHeading(fn (EmploymentContract $record): string => 
+                        $record->contract_file_path ? 'View Contract' : 'Generate Contract'
+                    )
+                    ->modalDescription(fn (EmploymentContract $record): string => 
+                        $record->contract_file_path 
+                            ? 'View the generated contract PDF' 
+                            : 'Generate contract PDF from template and send to employee?'
+                    )
                     ->action(function (EmploymentContract $record) {
-                        $contractService = app(\App\Services\ContractGenerationService::class);
-                        $contractService->generateContract($record);
-                        $record->markAsSent();
+                        if (!$record->contract_file_path) {
+                            $contractService = app(\App\Services\ContractGenerationService::class);
+                            $contractService->generateContract($record);
+                            $record->markAsSent();
+                        }
                     })
-                    ->visible(fn (EmploymentContract $record): bool => $record->status === 'draft'),
+                    ->url(fn (EmploymentContract $record): ?string => 
+                        $record->contract_file_path ? route('contract.download', $record->onboardingInvite->token) : null
+                    )
+                    ->openUrlInNewTab(fn (EmploymentContract $record): bool => (bool) $record->contract_file_path)
+                    ->visible(fn (EmploymentContract $record): bool => 
+                        $record->status === 'draft' || $record->contract_file_path
+                    ),
                 
                 Tables\Actions\Action::make('send_contract')
                     ->icon('heroicon-o-paper-airplane')
