@@ -80,7 +80,8 @@ class ContractTemplateResource extends Resource
                                 $variables = (new ContractTemplate())->getAvailableVariables();
                                 $html = '<div class="grid grid-cols-2 gap-2 text-sm">';
                                 foreach ($variables as $key => $description) {
-                                    $html .= "<div><code class='bg-gray-100 px-1 rounded'>{{$key}}</code> - {$description}</div>";
+                                    $html .= "<div><code class='bg-sky-100 text-black-800 px-1 rounded'>{{$key}}</code> - {$description}</div>";
+
                                 }
                                 $html .= '</div>';
                                 return new \Illuminate\Support\HtmlString($html);
