@@ -1,7 +1,7 @@
 # Architecture
 - Multitenancy: column-scoped (tenant_id). Global scope + middleware.
 - Auth: Passport; Access + Refresh tokens. Session revocation via token blacklisting.
-- OTP: OtpService (provider-agnostic). Store hashed OTP + expiry in Redis.
+- Authentication: Token-based magic links for simplified access.
 - KYC: KycService abstraction; provider adapters (e.g., Sumsub/Onfido) later.
 - Contracts: ContractService generates PDFs from templates; stores in S3; click-wrap evidence in AuditLog.
 - Audit: AuditService writes append-only hash chain {id, actor_id, action, payload_hash, prev_hash}.
@@ -19,5 +19,5 @@ positions(id, tenant_id, name, grade, contract_template_key);
 profile_change_requests(id, tenant_id, user_id, field, old_value, new_value, status, approved_by, approved_at);
 
 # Request Flow Examples
-- FR-002/003: /auth/magic-link → create short-lived token (Redis), send link+OTP → /auth/verify → issue JWT.
+- FR-002/003: /onboarding/invite → create magic link → /kyc/{token} → direct access to KYC form.
 - FR-007/008/009: /onboarding/contract/{id}/accept → capture click-wrap + signature image → store → email delivery.

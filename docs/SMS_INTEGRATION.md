@@ -175,29 +175,27 @@ GET /api/sms/providers
 
 ### Integration with Existing Code
 
-#### OTP Integration
+#### Onboarding Invitation Integration
 
-The SMS service can be easily integrated with the existing OTP system:
+The SMS service can be easily integrated with the onboarding invitation system:
 
 ```php
-// In your OTP controller
+// In your onboarding controller
 use App\Services\SmsService;
 
-public function sendOtp(Request $request)
+public function sendInvitation(Request $request)
 {
-    $otp = $this->generateOtp();
-    $message = "Your OTP is: {$otp}. Valid for 5 minutes.";
+    $invite = $this->createInvitation($request->all());
+    $message = "Welcome to Pizzaburg! Complete your onboarding: {$invite->kyc_url}";
     
     $smsService = app(SmsService::class);
     $result = $smsService->sendSms($request->phone, $message);
     
     if ($result['success']) {
-        // Store OTP in database
-        $this->storeOtp($request->phone, $otp);
-        return response()->json(['message' => 'OTP sent successfully']);
+        return response()->json(['message' => 'Invitation sent successfully']);
     }
     
-    return response()->json(['error' => 'Failed to send OTP'], 500);
+    return response()->json(['error' => 'Failed to send invitation'], 500);
 }
 ```
 
