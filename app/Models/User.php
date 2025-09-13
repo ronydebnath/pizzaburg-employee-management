@@ -21,6 +21,11 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'branch_id',
+        'phone',
+        'role',
+        'status',
+        'last_login_at',
     ];
 
     /**
@@ -43,6 +48,17 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'last_login_at' => 'datetime',
         ];
+    }
+
+    public function branch()
+    {
+        return $this->belongsTo(Branch::class);
+    }
+
+    public function employeeProfile()
+    {
+        return $this->hasOne(EmployeeProfile::class);
     }
 }
