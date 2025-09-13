@@ -106,7 +106,8 @@
                                     <label for="date_of_birth" class="block text-sm font-medium text-gray-700">Date of Birth *</label>
                                     <input type="date" id="date_of_birth" name="date_of_birth" required
                                            class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                                           value="{{ $verification->date_of_birth }}">
+                                           value="{{ $verification->date_of_birth }}"
+                                           max="{{ date('Y-m-d') }}">
                                 </div>
                                 <div>
                                     <label for="national_id" class="block text-sm font-medium text-gray-700">National ID *</label>
@@ -266,17 +267,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 mt-4">Verification Successful!</h3>
+                <h3 class="text-lg font-medium text-gray-900 mt-4">Information Submitted!</h3>
                 <div class="mt-2 px-7 py-3">
                     <p class="text-sm text-gray-500">
-                        Your identity has been successfully verified. You can now proceed to the next step.
+                        Your information has been submitted successfully. HR will review your details and contact you for the next steps.
                     </p>
-                </div>
-                <div class="items-center px-4 py-3">
-                    <a href="{{ route('contract.show', $invite->token) }}" 
-                       class="px-4 py-2 bg-blue-500 text-white text-base font-medium rounded-md w-full shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300">
-                        Continue to Contract
-                    </a>
                 </div>
             </div>
         </div>

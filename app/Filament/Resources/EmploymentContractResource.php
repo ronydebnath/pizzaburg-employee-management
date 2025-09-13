@@ -32,18 +32,75 @@ class EmploymentContractResource extends Resource
                 Forms\Components\Section::make('Contract Information')
                     ->schema([
                         Forms\Components\TextInput::make('contract_number')
+                            ->label('Contract Number')
                             ->disabled()
-                            ->dehydrated(false),
+                            ->dehydrated(false)
+                            ->placeholder('Auto-generated'),
                         
                         Forms\Components\Select::make('onboarding_invite_id')
+                            ->label('Employee')
                             ->relationship('onboardingInvite', 'email')
-                            ->searchable()
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->full_name . ' - ' . $record->email)
+                            ->searchable(['first_name', 'last_name', 'email'])
                             ->preload()
-                            ->required(),
+                            ->required()
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                if ($state) {
+                                    $invite = \App\Models\OnboardingInvite::find($state);
+                                    if ($invite && $invite->position) {
+                                        // Auto-select template based on position
+                                        $template = \App\Models\ContractTemplate::where('key', $invite->position->contract_template_key)
+                                            ->where('is_active', true)
+                                            ->first();
+                                        if ($template) {
+                                            $set('template_key', $template->key);
+                                        } else {
+                                            // Fallback to default template if position template not found
+                                            $defaultTemplate = \App\Models\ContractTemplate::where('key', 'standard_employment')
+                                                ->where('is_active', true)
+                                                ->first();
+                                            if ($defaultTemplate) {
+                                                $set('template_key', $defaultTemplate->key);
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    $set('template_key', '');
+                                }
+                            }),
                         
                         Forms\Components\TextInput::make('template_key')
+                            ->label('Template Key')
                             ->disabled()
-                            ->dehydrated(false),
+                            ->dehydrated(true)
+                            ->default(''),
+                        
+                        Forms\Components\Placeholder::make('employee_info')
+                            ->label('Employee Information')
+                            ->content(function (callable $get) {
+                                $inviteId = $get('onboarding_invite_id');
+                                if (!$inviteId) {
+                                    return 'Select an employee to view their information';
+                                }
+                                
+                                $invite = \App\Models\OnboardingInvite::with(['branch', 'position'])->find($inviteId);
+                                if (!$invite) {
+                                    return 'Employee not found';
+                                }
+                                
+                                return new \Illuminate\Support\HtmlString(
+                                    '<div class="bg-gray-50 p-3 rounded-lg text-sm">' .
+                                    '<p><strong>Name:</strong> ' . $invite->full_name . '</p>' .
+                                    '<p><strong>Email:</strong> ' . $invite->email . '</p>' .
+                                    '<p><strong>Phone:</strong> ' . $invite->phone . '</p>' .
+                                    '<p><strong>Position:</strong> ' . ($invite->position->name ?? 'Not set') . '</p>' .
+                                    '<p><strong>Branch:</strong> ' . ($invite->branch->name ?? 'Not set') . '</p>' .
+                                    '<p><strong>Joining Date:</strong> ' . ($invite->joining_date ? $invite->joining_date->format('M d, Y') : 'Not set') . '</p>' .
+                                    '</div>'
+                                );
+                            })
+                            ->visible(fn (callable $get) => !empty($get('onboarding_invite_id'))),
                         
                         Forms\Components\Select::make('status')
                             ->options([
@@ -56,13 +113,64 @@ class EmploymentContractResource extends Resource
                     ])
                     ->columns(2),
                 
+                Forms\Components\Section::make('Contract Template')
+                    ->schema([
+                        Forms\Components\Placeholder::make('template_content')
+                            ->label('Template Preview')
+                            ->content(function (callable $get) {
+                                $templateKey = $get('template_key');
+                                if (!$templateKey) {
+                                    return 'Select an employee to view the contract template';
+                                }
+                                
+                                $template = \App\Models\ContractTemplate::where('key', $templateKey)->first();
+                                if (!$template) {
+                                    return 'Template not found';
+                                }
+                                
+                                return new \Illuminate\Support\HtmlString(
+                                    '<div class="bg-gray-50 p-3 rounded-lg text-sm max-h-40 overflow-y-auto">' .
+                                    '<h4 class="font-semibold mb-2">' . $template->name . '</h4>' .
+                                    '<div class="text-gray-700">' . \Illuminate\Support\Str::limit(strip_tags($template->content), 300) . '</div>' .
+                                    '</div>'
+                                );
+                            })
+                            ->visible(fn (callable $get) => !empty($get('template_key'))),
+                    ])
+                    ->collapsible(),
+                
                 Forms\Components\Section::make('Contract Data')
                     ->schema([
                         Forms\Components\KeyValue::make('contract_data')
                             ->label('Contract Variables')
                             ->keyLabel('Variable')
                             ->valueLabel('Value')
-                            ->addActionLabel('Add Variable'),
+                            ->addActionLabel('Add Variable')
+                            ->default(function (callable $get) {
+                                $inviteId = $get('onboarding_invite_id');
+                                if (!$inviteId) {
+                                    return [];
+                                }
+                                
+                                $invite = \App\Models\OnboardingInvite::with(['branch', 'position'])->find($inviteId);
+                                if (!$invite) {
+                                    return [];
+                                }
+                                
+                                // Auto-populate with employee data
+                                return [
+                                    'employee_name' => $invite->full_name,
+                                    'employee_email' => $invite->email,
+                                    'employee_phone' => $invite->phone,
+                                    'branch_name' => $invite->branch->name ?? 'Not set',
+                                    'branch_address' => $invite->branch->address ?? 'N/A',
+                                    'position_name' => $invite->position->name ?? 'Not set',
+                                    'position_grade' => $invite->position->grade ?? 'N/A',
+                                    'start_date' => $invite->joining_date ? $invite->joining_date->format('M d, Y') : 'Not set',
+                                    'generated_date' => now()->format('M d, Y'),
+                                    'salary' => $invite->position->salary ?? 'As per company policy',
+                                ];
+                            }),
                     ])
                     ->collapsible(),
                 

@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class KycVerificationResource extends Resource
 {
@@ -194,7 +195,7 @@ class KycVerificationResource extends Resource
                     ->modalDescription('Are you sure you want to approve this KYC verification?')
                     ->action(function (KycVerification $record) {
                         $record->markAsApproved([
-                            'approved_by' => auth()->user()->name,
+                            'approved_by' => Auth::user()?->name ?? 'HR Admin',
                             'approved_at' => now()->toISOString(),
                         ]);
                         
@@ -218,7 +219,7 @@ class KycVerificationResource extends Resource
                     ])
                     ->action(function (KycVerification $record, array $data) {
                         $record->markAsRejected($data['rejection_reason'], [
-                            'rejected_by' => auth()->user()->name,
+                            'rejected_by' => Auth::user()?->name ?? 'HR Admin',
                             'rejected_at' => now()->toISOString(),
                         ]);
                     })
@@ -244,6 +245,7 @@ class KycVerificationResource extends Resource
         return [
             'index' => Pages\ListKycVerifications::route('/'),
             'create' => Pages\CreateKycVerification::route('/create'),
+            'view' => Pages\ViewKycVerification::route('/{record}'),
             'edit' => Pages\EditKycVerification::route('/{record}/edit'),
         ];
     }
