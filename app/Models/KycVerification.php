@@ -22,6 +22,15 @@ class KycVerification extends Model
         'rejection_reason',
         'verified_at',
         'expires_at',
+        // Profile information fields
+        'first_name',
+        'last_name',
+        'date_of_birth',
+        'national_id',
+        'address',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'profile_image_path',
     ];
 
     protected $casts = [
@@ -29,6 +38,7 @@ class KycVerification extends Model
         'result_data' => 'array',
         'verified_at' => 'datetime',
         'expires_at' => 'datetime',
+        'date_of_birth' => 'date',
     ];
 
     protected static function boot()
@@ -55,6 +65,16 @@ class KycVerification extends Model
     public function getDocumentUrlAttribute(): ?string
     {
         return $this->document_image_path ? Storage::url($this->document_image_path) : null;
+    }
+
+    public function getProfileImageUrlAttribute(): ?string
+    {
+        return $this->profile_image_path ? Storage::url($this->profile_image_path) : null;
+    }
+
+    public function getFullNameAttribute(): string
+    {
+        return trim($this->first_name . ' ' . $this->last_name);
     }
 
     public function isPending(): bool

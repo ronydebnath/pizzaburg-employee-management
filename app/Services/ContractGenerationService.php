@@ -4,19 +4,29 @@ namespace App\Services;
 
 use App\Models\EmploymentContract;
 use App\Models\OnboardingInvite;
+use App\Models\ContractTemplate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 
 class ContractGenerationService
 {
     /**
-     * Generate employment contract PDF
+     * Generate employment contract PDF from template
      */
     public function generateContract(EmploymentContract $contract): ?string
     {
         try {
             // Get the onboarding invite data
             $invite = $contract->onboardingInvite;
+            
+            // Get the contract template
+            $template = ContractTemplate::where('key', $contract->template_key)
+                ->where('is_active', true)
+                ->first();
+            
+            if (!$template) {
+                throw new \Exception('Contract template not found: ' . $contract->template_key);
+            }
             
             // Prepare contract data
             $contractData = array_merge([
@@ -28,19 +38,24 @@ class ContractGenerationService
                 'branch_address' => $invite->branch->address,
                 'position_name' => $invite->position->name,
                 'position_grade' => $invite->position->grade,
+                'start_date' => $invite->joining_date->format('M d, Y'),
                 'generated_date' => now()->format('M d, Y'),
-                'effective_date' => now()->addDays(7)->format('M d, Y'), // Start date
+                'salary' => $invite->position->salary ?? 'As per company policy',
             ], $contract->contract_data ?? []);
             
+            // Render template content with data
+            $renderedContent = $template->renderContent($contractData);
+            
             // Generate PDF content
-            $pdfContent = $this->generatePdfContent($contractData);
+            $pdfContent = $this->generatePdfContent($renderedContent, $contractData);
             
             // Save PDF to storage
             $pdfPath = $this->savePdf($contract, $pdfContent);
             
-            Log::info('Contract PDF generated', [
+            Log::info('Contract PDF generated from template', [
                 'contract_id' => $contract->id,
                 'contract_number' => $contract->contract_number,
+                'template_key' => $contract->template_key,
                 'pdf_path' => $pdfPath,
             ]);
             
@@ -110,9 +125,9 @@ class ContractGenerationService
     }
 
     /**
-     * Generate PDF content (placeholder - would use a PDF library like DomPDF or TCPDF)
+     * Generate PDF content from template
      */
-    private function generatePdfContent(array $data): string
+    private function generatePdfContent(string $renderedContent, array $data): string
     {
         // TODO: Implement actual PDF generation using DomPDF, TCPDF, or similar
         // For now, return HTML content that would be converted to PDF
@@ -123,43 +138,37 @@ class ContractGenerationService
         <head>
             <title>Employment Contract - {$data['contract_number']}</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 40px; }
-                .header { text-align: center; margin-bottom: 30px; }
-                .section { margin-bottom: 20px; }
-                .signature-section { margin-top: 50px; }
+                body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+                .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
+                .contract-content { margin-bottom: 30px; }
+                .signature-section { margin-top: 50px; border-top: 1px solid #ccc; padding-top: 20px; }
+                .signature-line { margin: 20px 0; }
+                h1 { color: #333; margin-bottom: 10px; }
+                h2 { color: #666; margin-bottom: 20px; }
+                h3 { color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+                p { margin: 10px 0; }
+                strong { color: #333; }
             </style>
         </head>
         <body>
             <div class='header'>
                 <h1>PIZZABURG EMPLOYMENT CONTRACT</h1>
                 <h2>Contract Number: {$data['contract_number']}</h2>
+                <p>Generated on: {$data['generated_date']}</p>
             </div>
             
-            <div class='section'>
-                <h3>Employee Information</h3>
-                <p><strong>Name:</strong> {$data['employee_name']}</p>
-                <p><strong>Email:</strong> {$data['employee_email']}</p>
-                <p><strong>Phone:</strong> {$data['employee_phone']}</p>
-            </div>
-            
-            <div class='section'>
-                <h3>Position Details</h3>
-                <p><strong>Position:</strong> {$data['position_name']}</p>
-                <p><strong>Grade:</strong> {$data['position_grade']}</p>
-                <p><strong>Branch:</strong> {$data['branch_name']}</p>
-                <p><strong>Branch Address:</strong> {$data['branch_address']}</p>
-            </div>
-            
-            <div class='section'>
-                <h3>Contract Terms</h3>
-                <p><strong>Effective Date:</strong> {$data['effective_date']}</p>
-                <p><strong>Generated Date:</strong> {$data['generated_date']}</p>
+            <div class='contract-content'>
+                {$renderedContent}
             </div>
             
             <div class='signature-section'>
                 <h3>Signatures</h3>
-                <p>Employee Signature: _________________________ Date: ___________</p>
-                <p>HR Representative: _________________________ Date: ___________</p>
+                <div class='signature-line'>
+                    <p>Employee Signature: _________________________ Date: ___________</p>
+                </div>
+                <div class='signature-line'>
+                    <p>HR Representative: _________________________ Date: ___________</p>
+                </div>
             </div>
         </body>
         </html>";

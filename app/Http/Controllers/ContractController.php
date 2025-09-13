@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EmploymentContract;
 use App\Models\OnboardingInvite;
 use App\Services\ContractGenerationService;
+use App\Services\EmailService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Storage;
@@ -13,10 +14,12 @@ use Illuminate\Support\Facades\Log;
 class ContractController extends Controller
 {
     protected ContractGenerationService $contractService;
+    protected EmailService $emailService;
 
-    public function __construct(ContractGenerationService $contractService)
+    public function __construct(ContractGenerationService $contractService, EmailService $emailService)
     {
         $this->contractService = $contractService;
+        $this->emailService = $emailService;
     }
 
     /**
@@ -125,8 +128,17 @@ class ContractController extends Controller
             // Generate final signed PDF
             $signedPdfPath = $this->contractService->generateSignedContract($contract);
 
+            // Mark contract as completed
+            $contract->update(['status' => 'completed', 'completed_at' => now()]);
+
             // Mark invite as completed
             $invite->update(['status' => 'completed']);
+
+            // Send signed notification email
+            $this->emailService->sendContractSignedNotification($contract);
+
+            // Send completed notification with PDF attachment
+            $this->emailService->sendContractCompletedNotification($contract);
 
             // Log the contract acceptance
             Log::info('Contract accepted', [

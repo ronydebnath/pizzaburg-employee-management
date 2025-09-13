@@ -77,92 +77,166 @@
                     </div>
                 </div>
             @else
-                <!-- Verification Instructions -->
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Selfie Liveness Verification</h2>
-                    </div>
-                    <div class="px-6 py-4">
-                        <div class="mb-6">
-                            <h3 class="text-sm font-medium text-gray-900 mb-3">Please follow these instructions:</h3>
-                            <ul class="text-sm text-gray-600 space-y-2">
-                                <li class="flex items-start">
-                                    <span class="flex-shrink-0 h-5 w-5 text-blue-500 mt-0.5">•</span>
-                                    <span class="ml-2">Ensure you have good lighting on your face</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <span class="flex-shrink-0 h-5 w-5 text-blue-500 mt-0.5">•</span>
-                                    <span class="ml-2">Look directly at the camera</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <span class="flex-shrink-0 h-5 w-5 text-blue-500 mt-0.5">•</span>
-                                    <span class="ml-2">Remove any glasses, hats, or face coverings</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <span class="flex-shrink-0 h-5 w-5 text-blue-500 mt-0.5">•</span>
-                                    <span class="ml-2">Keep your face centered in the frame</span>
-                                </li>
-                                <li class="flex items-start">
-                                    <span class="flex-shrink-0 h-5 w-5 text-blue-500 mt-0.5">•</span>
-                                    <span class="ml-2">Click "Take Selfie" when ready</span>
-                                </li>
-                            </ul>
+                <!-- Profile Information Form -->
+                <form id="kycForm" class="space-y-6">
+                    <!-- Personal Information -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-900">Personal Information</h2>
+                            <p class="text-sm text-gray-600 mt-1">Please provide your personal details</p>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Camera Section -->
-                <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h2 class="text-lg font-semibold text-gray-900">Take Your Selfie</h2>
-                    </div>
-                    <div class="px-6 py-4">
-                        <!-- Camera Preview -->
-                        <div class="relative mb-4">
-                            <video id="video" width="400" height="300" class="w-full max-w-md mx-auto border border-gray-300 rounded-lg" autoplay muted></video>
-                            <canvas id="canvas" width="400" height="300" class="hidden"></canvas>
-                        </div>
-
-                        <!-- Camera Controls -->
-                        <div class="flex flex-col items-center space-y-4">
-                            <div class="flex space-x-4">
-                                <button id="startCamera" 
-                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    Start Camera
-                                </button>
-                                
-                                <button id="takeSelfie" 
-                                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                                        disabled>
-                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                    Take Selfie
-                                </button>
+                        <div class="px-6 py-4 space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="first_name" class="block text-sm font-medium text-gray-700">First Name *</label>
+                                    <input type="text" id="first_name" name="first_name" required
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                           value="{{ $verification->first_name ?? $invite->first_name }}">
+                                </div>
+                                <div>
+                                    <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name *</label>
+                                    <input type="text" id="last_name" name="last_name" required
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                           value="{{ $verification->last_name ?? $invite->last_name }}">
+                                </div>
                             </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="date_of_birth" class="block text-sm font-medium text-gray-700">Date of Birth *</label>
+                                    <input type="date" id="date_of_birth" name="date_of_birth" required
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                           value="{{ $verification->date_of_birth }}">
+                                </div>
+                                <div>
+                                    <label for="national_id" class="block text-sm font-medium text-gray-700">National ID *</label>
+                                    <input type="text" id="national_id" name="national_id" required
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                           value="{{ $verification->national_id }}">
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <label for="address" class="block text-sm font-medium text-gray-700">Address *</label>
+                                <textarea id="address" name="address" rows="3" required
+                                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">{{ $verification->address }}</textarea>
+                            </div>
+                        </div>
+                    </div>
 
-                            <!-- Selfie Preview -->
-                            <div id="selfiePreview" class="hidden">
-                                <img id="selfieImage" class="w-64 h-48 object-cover border border-gray-300 rounded-lg" alt="Captured selfie">
-                                <div class="mt-4 flex space-x-4">
-                                    <button id="retakeSelfie" 
-                                            class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                        Retake
-                                    </button>
-                                    <button id="submitSelfie" 
-                                            class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                        Submit for Verification
-                                    </button>
+                    <!-- Emergency Contact -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-900">Emergency Contact</h2>
+                        </div>
+                        <div class="px-6 py-4 space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="emergency_contact_name" class="block text-sm font-medium text-gray-700">Contact Name *</label>
+                                    <input type="text" id="emergency_contact_name" name="emergency_contact_name" required
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                           value="{{ $verification->emergency_contact_name }}">
+                                </div>
+                                <div>
+                                    <label for="emergency_contact_phone" class="block text-sm font-medium text-gray-700">Contact Phone *</label>
+                                    <input type="tel" id="emergency_contact_phone" name="emergency_contact_phone" required
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                                           value="{{ $verification->emergency_contact_phone }}">
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
+
+                    <!-- Photo Upload Section -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="px-6 py-4 border-b border-gray-200">
+                            <h2 class="text-lg font-semibold text-gray-900">Profile Photo</h2>
+                            <p class="text-sm text-gray-600 mt-1">Upload your profile photo or take a selfie</p>
+                        </div>
+                        <div class="px-6 py-4">
+                            <!-- Photo Upload Options -->
+                            <div class="space-y-4">
+                                <!-- File Upload -->
+                                <div>
+                                    <label for="profile_photo" class="block text-sm font-medium text-gray-700">Upload Photo</label>
+                                    <input type="file" id="profile_photo" name="profile_photo" accept="image/*" 
+                                           class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                </div>
+                                
+                                <!-- OR Divider -->
+                                <div class="relative">
+                                    <div class="absolute inset-0 flex items-center">
+                                        <div class="w-full border-t border-gray-300" />
+                                    </div>
+                                    <div class="relative flex justify-center text-sm">
+                                        <span class="px-2 bg-white text-gray-500">OR</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Camera Section -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Take Selfie</label>
+                                    
+                                    <!-- Camera Preview -->
+                                    <div class="relative mb-4">
+                                        <video id="video" width="400" height="300" class="w-full max-w-md mx-auto border border-gray-300 rounded-lg hidden" autoplay muted></video>
+                                        <canvas id="canvas" width="400" height="300" class="hidden"></canvas>
+                                    </div>
+
+                                    <!-- Camera Controls -->
+                                    <div class="flex flex-col items-center space-y-4">
+                                        <div class="flex space-x-4">
+                                            <button type="button" id="startCamera" 
+                                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                Start Camera
+                                            </button>
+                                            
+                                            <button type="button" id="takeSelfie" 
+                                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    disabled>
+                                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                Take Selfie
+                                            </button>
+                                        </div>
+
+                                        <!-- Selfie Preview -->
+                                        <div id="selfiePreview" class="hidden">
+                                            <img id="selfieImage" class="w-64 h-48 object-cover border border-gray-300 rounded-lg" alt="Captured selfie">
+                                            <div class="mt-4 flex space-x-4">
+                                                <button type="button" id="retakeSelfie" 
+                                                        class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                    Retake
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div class="px-6 py-4">
+                            <div class="flex items-center justify-end">
+                                <button type="submit" id="submitKyc" 
+                                        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Submit Information
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
 
                 <!-- Processing Status -->
                 <div id="processingStatus" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-6 mb-6">
@@ -260,20 +334,35 @@
                 capturedImage = null;
             });
 
-            // Submit selfie
-            submitSelfieBtn.addEventListener('click', function() {
-                if (capturedImage) {
-                    submitVerification(capturedImage);
-                }
+            // Form submission
+            document.getElementById('kycForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitKycForm();
             });
 
-            function submitVerification(selfieData) {
+            function submitKycForm() {
                 processingStatus.classList.remove('hidden');
                 
                 const formData = new FormData();
-                formData.append('selfie', selfieData);
+                
+                // Add form fields
+                formData.append('first_name', document.getElementById('first_name').value);
+                formData.append('last_name', document.getElementById('last_name').value);
+                formData.append('date_of_birth', document.getElementById('date_of_birth').value);
+                formData.append('national_id', document.getElementById('national_id').value);
+                formData.append('address', document.getElementById('address').value);
+                formData.append('emergency_contact_name', document.getElementById('emergency_contact_name').value);
+                formData.append('emergency_contact_phone', document.getElementById('emergency_contact_phone').value);
                 formData.append('verification_id', '{{ $verification->verification_id }}');
                 formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+                
+                // Add profile photo (file upload or selfie)
+                const profilePhoto = document.getElementById('profile_photo').files[0];
+                if (profilePhoto) {
+                    formData.append('profile_photo', profilePhoto);
+                } else if (capturedImage) {
+                    formData.append('selfie', capturedImage);
+                }
 
                 fetch('{{ route("kyc.verify", $invite->token) }}', {
                     method: 'POST',
@@ -289,17 +378,13 @@
                     if (data.success) {
                         document.getElementById('successModal').classList.remove('hidden');
                     } else {
-                        alert('Verification failed: ' + data.message);
-                        // Reset for retry
-                        selfiePreview.classList.add('hidden');
-                        video.style.display = 'block';
-                        capturedImage = null;
+                        alert('Submission failed: ' + data.message);
                     }
                 })
                 .catch(error => {
                     processingStatus.classList.add('hidden');
                     console.error('Error:', error);
-                    alert('An error occurred during verification. Please try again.');
+                    alert('An error occurred during submission. Please try again.');
                 });
             }
 

@@ -25,58 +25,62 @@ class KycService
     }
 
     /**
-     * Process selfie liveness verification
+     * Process profile information submission
      */
-    public function processSelfieLiveness(KycVerification $verification, string $selfieData): array
+    public function processProfileSubmission(KycVerification $verification, array $data): array
     {
         try {
             $verification->markAsProcessing();
 
-            // Save selfie image
-            $selfiePath = $this->saveSelfieImage($verification, $selfieData);
-            $verification->update(['selfie_image_path' => $selfiePath]);
+            // Save profile information
+            $profileData = [
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'],
+                'date_of_birth' => $data['date_of_birth'],
+                'national_id' => $data['national_id'],
+                'address' => $data['address'],
+                'emergency_contact_name' => $data['emergency_contact_name'],
+                'emergency_contact_phone' => $data['emergency_contact_phone'],
+            ];
 
-            // Perform liveness detection (simplified version)
-            $livenessResult = $this->performLivenessDetection($selfieData);
-
-            if ($livenessResult['is_live']) {
-                $verification->markAsApproved($livenessResult);
-                
-                Log::info('KYC verification approved', [
-                    'verification_id' => $verification->verification_id,
-                    'invite_id' => $verification->onboarding_invite_id,
-                    'liveness_score' => $livenessResult['liveness_score'],
-                ]);
-
-                return [
-                    'success' => true,
-                    'status' => 'approved',
-                    'message' => 'Selfie liveness verification successful',
-                    'verification_id' => $verification->verification_id,
-                    'result' => $livenessResult,
-                ];
-            } else {
-                $verification->markAsRejected('Liveness detection failed', $livenessResult);
-                
-                Log::warning('KYC verification rejected - liveness failed', [
-                    'verification_id' => $verification->verification_id,
-                    'invite_id' => $verification->onboarding_invite_id,
-                    'liveness_score' => $livenessResult['liveness_score'],
-                ]);
-
-                return [
-                    'success' => false,
-                    'status' => 'rejected',
-                    'message' => 'Liveness detection failed. Please ensure you are a real person and try again.',
-                    'verification_id' => $verification->verification_id,
-                    'result' => $livenessResult,
-                ];
+            // Handle profile photo upload
+            if (isset($data['profile_photo']) && $data['profile_photo']) {
+                $profileImagePath = $this->saveProfileImage($verification, $data['profile_photo']);
+                $profileData['profile_image_path'] = $profileImagePath;
+            } elseif (isset($data['selfie']) && $data['selfie']) {
+                $selfiePath = $this->saveSelfieImage($verification, $data['selfie']);
+                $profileData['selfie_image_path'] = $selfiePath;
             }
+
+            // Update verification with profile data
+            $verification->update($profileData);
+
+            // Mark as pending HR review (not auto-approved)
+            $verification->update([
+                'status' => 'pending_hr_review',
+                'verification_data' => [
+                    'submitted_at' => now()->toISOString(),
+                    'submission_method' => 'web_form',
+                ],
+            ]);
+            
+            Log::info('KYC profile information submitted', [
+                'verification_id' => $verification->verification_id,
+                'invite_id' => $verification->onboarding_invite_id,
+                'employee_name' => $verification->full_name,
+            ]);
+
+            return [
+                'success' => true,
+                'status' => 'pending_hr_review',
+                'message' => 'Profile information submitted successfully. HR will review and approve your account.',
+                'verification_id' => $verification->verification_id,
+            ];
 
         } catch (\Exception $e) {
             $verification->markAsFailed('Processing error: ' . $e->getMessage());
             
-            Log::error('KYC verification failed', [
+            Log::error('KYC profile submission failed', [
                 'verification_id' => $verification->verification_id,
                 'invite_id' => $verification->onboarding_invite_id,
                 'error' => $e->getMessage(),
@@ -85,10 +89,18 @@ class KycService
             return [
                 'success' => false,
                 'status' => 'failed',
-                'message' => 'An error occurred during verification. Please try again.',
+                'message' => 'An error occurred during submission. Please try again.',
                 'verification_id' => $verification->verification_id,
             ];
         }
+    }
+
+    /**
+     * Process selfie liveness verification (legacy method - kept for compatibility)
+     */
+    public function processSelfieLiveness(KycVerification $verification, string $selfieData): array
+    {
+        return $this->processProfileSubmission($verification, ['selfie' => $selfieData]);
     }
 
     /**
@@ -137,6 +149,20 @@ class KycService
             ->first();
 
         return !$approvedVerification;
+    }
+
+    /**
+     * Save profile image from uploaded file
+     */
+    private function saveProfileImage(KycVerification $verification, $file): string
+    {
+        // Generate filename
+        $filename = 'kyc/profiles/' . $verification->verification_id . '_profile.' . $file->getClientOriginalExtension();
+
+        // Save to storage
+        $path = $file->storeAs('kyc/profiles', $verification->verification_id . '_profile.' . $file->getClientOriginalExtension());
+
+        return $path;
     }
 
     /**

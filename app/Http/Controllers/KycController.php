@@ -76,14 +76,22 @@ class KycController extends Controller
     }
 
     /**
-     * Process selfie liveness verification
+     * Process KYC profile information submission
      */
     public function verifySelfie(Request $request, string $token): JsonResponse
     {
         try {
             $request->validate([
-                'selfie' => 'required|string',
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'date_of_birth' => 'required|date',
+                'national_id' => 'required|string|max:255',
+                'address' => 'required|string',
+                'emergency_contact_name' => 'required|string|max:255',
+                'emergency_contact_phone' => 'required|string|max:20',
                 'verification_id' => 'required|string',
+                'profile_photo' => 'nullable|image|max:2048',
+                'selfie' => 'nullable|string',
             ]);
 
             // Find the onboarding invite
@@ -125,20 +133,20 @@ class KycController extends Controller
                 ], 400);
             }
 
-            // Process the selfie liveness verification
-            $result = $this->kycService->processSelfieLiveness($verification, $request->selfie);
+            // Process the profile information submission
+            $result = $this->kycService->processProfileSubmission($verification, $request->all());
 
             return response()->json($result);
 
         } catch (\Exception $e) {
-            Log::error('KYC verification error: ' . $e->getMessage(), [
+            Log::error('KYC profile submission error: ' . $e->getMessage(), [
                 'token' => $token,
                 'error' => $e->getTraceAsString(),
             ]);
 
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred during verification. Please try again.'
+                'message' => 'An error occurred during submission. Please try again.'
             ], 500);
         }
     }
