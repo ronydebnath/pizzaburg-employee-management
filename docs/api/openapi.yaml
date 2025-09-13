@@ -1,0 +1,41 @@
+openapi: 3.0.3
+info:
+  title: HR Onboarding & Identity platform
+  version: 0.1.0
+servers:
+  - url: https://api.example.com
+paths:
+  /auth/otp/send:
+    post:
+      summary: FR-010 Send OTP
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: object, properties: { phone: { type: string } }, required: [phone] }
+      responses:
+        "204": { description: Sent }
+        "429": { description: Throttled }
+  /auth/otp/verify:
+    post:
+      summary: FR-011 Verify OTP & issue tokens (FR-019)
+      responses:
+        "200":
+          description: Tokens
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: { access_token: { type: string }, refresh_token: { type: string } }
+  /onboarding/invites:
+    post:
+      summary: FR-001 Create pre-approved onboarding invite
+      responses: { "201": { description: Created } }
+  /onboarding/kyc:
+    post:
+      summary: FR-004 KYC capture with selfie liveness
+      responses: { "202": { description: Accepted for review } }
+  /profile/me:
+    get:
+      summary: FR-020 Profile view
+      responses: { "200": { description: Profile returned } }
