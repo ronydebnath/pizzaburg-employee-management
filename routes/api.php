@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\OtpController;
+use App\Http\Controllers\SmsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,6 +45,15 @@ Route::prefix('onboarding')->group(function () {
             'token' => $token,
         ]);
     });
+});
+
+// SMS Routes
+Route::prefix('sms')->group(function () {
+    Route::post('/send', [SmsController::class, 'sendSms']);
+    Route::post('/send-with-provider', [SmsController::class, 'sendSmsWithProvider']);
+    Route::post('/send-with-queue', [SmsController::class, 'sendSmsWithQueue']);
+    Route::post('/test-provider', [SmsController::class, 'testProvider']);
+    Route::get('/providers', [SmsController::class, 'getActiveProviders']);
 });
 
 // Health Check
