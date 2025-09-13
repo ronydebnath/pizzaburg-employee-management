@@ -10,6 +10,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class OnboardingInviteResource extends Resource
 {
@@ -17,7 +18,7 @@ class OnboardingInviteResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-envelope-open';
     
-    protected static ?string $navigationGroup = 'Onboarding';
+    protected static ?string $navigationGroup = 'Employee Onboarding';
     
     protected static ?int $navigationSort = 1;
 
@@ -111,6 +112,22 @@ class OnboardingInviteResource extends Resource
                         'expired' => 'danger',
                         default => 'gray',
                     }),
+                Tables\Columns\TextColumn::make('kyc_status')
+                    ->label('KYC Status')
+                    ->getStateUsing(function ($record) {
+                        $kyc = $record->kycVerifications()->latest()->first();
+                        return $kyc ? $kyc->status : 'Not Started';
+                    })
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending' => 'warning',
+                        'pending_hr_review' => 'info',
+                        'approved' => 'success',
+                        'rejected' => 'danger',
+                        'failed' => 'danger',
+                        'Not Started' => 'gray',
+                        default => 'gray',
+                    }),
                 Tables\Columns\TextColumn::make('expires_at')
                     ->dateTime()
                     ->sortable()
@@ -153,14 +170,171 @@ class OnboardingInviteResource extends Resource
                     ->label('Send Invitation')
                     ->icon('heroicon-o-paper-airplane')
                     ->color('success')
+                    ->requiresConfirmation()
+                    ->modalHeading('Send Onboarding Invitation')
+                    ->modalDescription('Send invitation to employee for KYC completion?')
                     ->visible(fn ($record) => $record->status === 'pending')
                     ->action(function ($record) {
-                        // TODO: Implement send invitation logic
+                        // Create KYC verification record for employee self-filling
+                        $record->kycVerifications()->create([
+                            'verification_id' => 'KYC-' . strtoupper(\Illuminate\Support\Str::random(12)),
+                            'provider' => 'internal',
+                            'status' => 'pending',
+                            'type' => 'selfie_liveness',
+                            'expires_at' => now()->addHours(24),
+                        ]);
+                        
+                        // Send invitation email
+                        $emailService = app(\App\Services\EmailService::class);
+                        $emailService->sendOnboardingInvitation($record);
+                        
                         $record->update([
                             'status' => 'sent',
                             'sent_at' => now(),
                         ]);
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title('Invitation sent successfully')
+                            ->body('Employee will receive KYC link via email.')
+                            ->success()
+                            ->send();
                     }),
+                Tables\Actions\Action::make('fill_kyc')
+                    ->label('Fill KYC (HR)')
+                    ->icon('heroicon-o-user-plus')
+                    ->color('warning')
+                    ->modalHeading('Fill KYC Information for Employee')
+                    ->modalDescription('Complete the KYC form on behalf of the employee. First name and last name are pre-filled from the invitation data.')
+                    ->fillForm(function (OnboardingInvite $record): array {
+                        return [
+                            'first_name' => $record->first_name,
+                            'last_name' => $record->last_name,
+                        ];
+                    })
+                    ->form([
+                        Forms\Components\Section::make('Employee Information')
+                            ->schema([
+                                Forms\Components\Placeholder::make('employee_info')
+                                    ->label('Employee Details')
+                                    ->content(function (OnboardingInvite $record) {
+                                        return new \Illuminate\Support\HtmlString(
+                                            '<div class="bg-gray-50 p-3 rounded-lg text-sm">' .
+                                            '<p><strong>Name:</strong> ' . $record->full_name . '</p>' .
+                                            '<p><strong>Email:</strong> ' . $record->email . '</p>' .
+                                            '<p><strong>Phone:</strong> ' . $record->phone . '</p>' .
+                                            '<p><strong>Position:</strong> ' . $record->position->name . '</p>' .
+                                            '<p><strong>Branch:</strong> ' . $record->branch->name . '</p>' .
+                                            '</div>'
+                                        );
+                                    }),
+                            ]),
+                        
+                        Forms\Components\Section::make('Personal Information')
+                            ->schema([
+                                Forms\Components\TextInput::make('first_name')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('last_name')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\DatePicker::make('date_of_birth')
+                                    ->required(),
+                                Forms\Components\TextInput::make('national_id')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\Textarea::make('address')
+                                    ->required()
+                                    ->rows(3),
+                            ])
+                            ->columns(2),
+                        
+                        Forms\Components\Section::make('Emergency Contact')
+                            ->schema([
+                                Forms\Components\TextInput::make('emergency_contact_name')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\TextInput::make('emergency_contact_phone')
+                                    ->required()
+                                    ->maxLength(20),
+                            ])
+                            ->columns(2),
+                        
+                        Forms\Components\Section::make('Profile Photo')
+                            ->schema([
+                                Forms\Components\FileUpload::make('profile_photo')
+                                    ->label('Upload Profile Photo')
+                                    ->image()
+                                    ->directory('kyc/profiles')
+                                    ->visibility('private'),
+                            ]),
+                    ])
+                    ->action(function (OnboardingInvite $record, array $data) {
+                        // Create KYC verification record
+                        $kycVerification = $record->kycVerifications()->create([
+                            'verification_id' => 'KYC-' . strtoupper(\Illuminate\Support\Str::random(12)),
+                            'provider' => 'hr_admin',
+                            'status' => 'approved',
+                            'type' => 'selfie_liveness',
+                            'first_name' => $data['first_name'],
+                            'last_name' => $data['last_name'],
+                            'date_of_birth' => $data['date_of_birth'],
+                            'national_id' => $data['national_id'],
+                            'address' => $data['address'],
+                            'emergency_contact_name' => $data['emergency_contact_name'],
+                            'emergency_contact_phone' => $data['emergency_contact_phone'],
+                            'profile_image_path' => $data['profile_photo'] ?? null,
+                            'verified_at' => now(),
+                            'verification_data' => [
+                                'filled_by' => Auth::user()?->name ?? 'HR Admin',
+                                'filled_at' => now()->toISOString(),
+                                'method' => 'hr_admin_form',
+                            ],
+                        ]);
+                        
+                        // Create employee profile
+                        $user = \App\Models\User::updateOrCreate(
+                            ['email' => $record->email],
+                            [
+                                'name' => $data['first_name'] . ' ' . $data['last_name'],
+                                'phone' => $record->phone,
+                                'branch_id' => $record->branch_id,
+                                'role' => 'employee',
+                                'status' => 'active',
+                            ]
+                        );
+                        
+                        \App\Models\EmployeeProfile::updateOrCreate(
+                            ['user_id' => $user->id],
+                            [
+                                'branch_id' => $record->branch_id,
+                                'position_id' => $record->position_id,
+                                'first_name' => $data['first_name'],
+                                'last_name' => $data['last_name'],
+                                'date_of_birth' => $data['date_of_birth'],
+                                'joining_date' => $record->joining_date,
+                                'effective_from' => $record->joining_date,
+                                'meta' => [
+                                    'national_id' => $data['national_id'],
+                                    'address' => $data['address'],
+                                    'emergency_contact_name' => $data['emergency_contact_name'],
+                                    'emergency_contact_phone' => $data['emergency_contact_phone'],
+                                    'kyc_verification_id' => $kycVerification->id,
+                                    'filled_by_hr' => true,
+                                ],
+                            ]
+                        );
+                        
+                        // Mark invite as completed
+                        $record->update(['status' => 'completed']);
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title('KYC filled successfully')
+                            ->body('Employee profile created and onboarding completed.')
+                            ->success()
+                            ->send();
+                    })
+                    ->visible(fn ($record) => $record->status === 'pending' || $record->status === 'sent'),
+                
                 Tables\Actions\Action::make('view_progress')
                     ->label('View Progress')
                     ->icon('heroicon-o-eye')

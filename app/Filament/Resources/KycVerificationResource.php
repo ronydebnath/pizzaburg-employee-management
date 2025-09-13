@@ -19,7 +19,7 @@ class KycVerificationResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-user-circle';
     
-    protected static ?string $navigationGroup = 'Employee Management';
+    protected static ?string $navigationGroup = 'Employee Onboarding';
     
     protected static ?int $navigationSort = 2;
     
