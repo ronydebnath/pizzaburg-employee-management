@@ -57,9 +57,8 @@
         
         <h3>Contract Details:</h3>
         <ul>
-            <li><strong>Position:</strong> {{ $invite->position->name }}</li>
-            <li><strong>Branch:</strong> {{ $invite->branch->name }}</li>
-            <li><strong>Start Date:</strong> {{ $invite->joining_date->format('M d, Y') }}</li>
+            <li><strong>Position:</strong> {{ $invite->position?->name ?? 'N/A' }}</li>
+            <li><strong>Branch:</strong> {{ $invite->branch?->name ?? 'N/A' }}</li>
             <li><strong>Contract Number:</strong> {{ $contract->contract_number }}</li>
         </ul>
         

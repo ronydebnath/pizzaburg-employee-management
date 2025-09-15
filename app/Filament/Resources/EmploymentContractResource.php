@@ -315,17 +315,43 @@ class EmploymentContractResource extends Resource
                 Tables\Actions\Action::make('send_contract')
                     ->icon('heroicon-o-paper-airplane')
                     ->color('success')
+                    ->label('Send Contract')
                     ->requiresConfirmation()
                     ->modalHeading('Send Contract')
                     ->modalDescription('Send contract to employee for signing?')
                     ->action(function (EmploymentContract $record) {
-                        $record->markAsSent();
-                        
-                        // Send contract notification email
-                        $emailService = app(\App\Services\EmailService::class);
-                        $emailService->sendContractSentNotification($record);
+                        try {
+                            // Send contract notification email first
+                            $emailService = app(\App\Services\EmailService::class);
+                            $emailSent = $emailService->sendContractSentNotification($record);
+                            
+                            if ($emailSent) {
+                                // Mark as sent only if email was sent successfully
+                                $record->markAsSent();
+                                
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Contract Sent Successfully')
+                                    ->body('The contract has been sent to ' . $record->onboardingInvite->email)
+                                    ->success()
+                                    ->send();
+                            } else {
+                                \Filament\Notifications\Notification::make()
+                                    ->title('Failed to Send Contract')
+                                    ->body('There was an error sending the contract email. Please try again.')
+                                    ->danger()
+                                    ->send();
+                            }
+                        } catch (\Exception $e) {
+                            \Filament\Notifications\Notification::make()
+                                ->title('Error')
+                                ->body('An error occurred: ' . $e->getMessage())
+                                ->danger()
+                                ->send();
+                        }
                     })
-                    ->visible(fn (EmploymentContract $record): bool => $record->status === 'draft'),
+                    ->visible(fn (EmploymentContract $record): bool => 
+                        $record->contract_file_path && in_array($record->status, ['draft', 'sent'])
+                    ),
                 
                 Tables\Actions\Action::make('download_contract')
                     ->icon('heroicon-o-arrow-down')

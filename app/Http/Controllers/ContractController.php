@@ -171,7 +171,7 @@ class ContractController extends Controller
     }
 
     /**
-     * Download signed contract PDF
+     * Download contract PDF (generated or signed)
      */
     public function download(string $token)
     {
@@ -184,15 +184,25 @@ class ContractController extends Controller
 
             $contract = EmploymentContract::where('onboarding_invite_id', $invite->id)->first();
 
-            if (!$contract || !$contract->signed_pdf_path) {
-                abort(404, 'Signed contract not found');
+            if (!$contract) {
+                abort(404, 'Contract not found');
             }
 
-            if (!Storage::exists($contract->signed_pdf_path)) {
+            // Check for signed PDF first, then generated contract
+            $filePath = null;
+            $filename = null;
+
+            if ($contract->signed_pdf_path && Storage::exists($contract->signed_pdf_path)) {
+                $filePath = $contract->signed_pdf_path;
+                $filename = "contract-{$contract->contract_number}-signed.pdf";
+            } elseif ($contract->contract_file_path && Storage::exists($contract->contract_file_path)) {
+                $filePath = $contract->contract_file_path;
+                $filename = "contract-{$contract->contract_number}.pdf";
+            } else {
                 abort(404, 'Contract file not found');
             }
 
-            return Storage::download($contract->signed_pdf_path, "contract-{$contract->contract_number}.pdf");
+            return Storage::download($filePath, $filename);
 
         } catch (\Exception $e) {
             Log::error('Contract download error: ' . $e->getMessage(), [
@@ -213,12 +223,12 @@ class ContractController extends Controller
             'employee_name' => $invite->full_name,
             'employee_email' => $invite->email,
             'employee_phone' => $invite->phone,
-            'branch_name' => $invite->branch->name,
-            'branch_address' => $invite->branch->address,
-            'position_name' => $invite->position->name,
-            'position_grade' => $invite->position->grade,
-            'start_date' => $invite->joining_date->format('M d, Y'),
-            'salary' => $invite->position->salary ?? 'As per company policy',
+            'branch_name' => $invite->branch?->name ?? 'N/A',
+            'branch_address' => $invite->branch?->address ?? 'N/A',
+            'position_name' => $invite->position?->name ?? 'N/A',
+            'position_grade' => $invite->position?->grade ?? 'N/A',
+            'start_date' => now()->format('M d, Y'), // Default to current date since joining_date doesn't exist
+            'salary' => $invite->position?->salary ?? 'As per company policy',
             'generated_date' => now()->format('M d, Y'),
         ];
     }
