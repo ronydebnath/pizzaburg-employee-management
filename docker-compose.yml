@@ -40,9 +40,9 @@ services:
             - .docker/db/sql:/docker-entrypoint-initdb.d
         environment:
             MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: refactorian
-            MYSQL_USER: refactorian
-            MYSQL_PASSWORD: refactorian
+            MYSQL_DATABASE: pizz-emp-management
+            MYSQL_USER: burger
+            MYSQL_PASSWORD: 6502JDjbyqv3
 
     ####################################################################################################
     # phpMyAdmin
