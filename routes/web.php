@@ -6,7 +6,7 @@ use App\Http\Controllers\ContractController;
 use App\Http\Controllers\KycController;
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/admin');
 });
 
 // Contract signing routes

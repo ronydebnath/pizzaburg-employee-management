@@ -23,5 +23,13 @@ class DatabaseSeeder extends Seeder
         $this->call([
             SmsSettingSeeder::class,
         ]);
+
+        $this->call([
+            BranchSeeder::class,
+        ]);
+
+        $this->call([
+           ContractTemplateSeeder::class,
+        ]);
     }
 }
