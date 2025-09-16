@@ -45,10 +45,22 @@ class BranchSeeder extends Seeder
         // Create sample positions for each branch
         $positions = [
             ['name' => 'Manager', 'grade' => 'M1', 'contract_template_key' => 'manager_template'],
-            ['name' => 'Senior Developer', 'grade' => 'SD1', 'contract_template_key' => 'developer_template'],
-            ['name' => 'Developer', 'grade' => 'D1', 'contract_template_key' => 'developer_template'],
+            ['name' => 'Senior Manager', 'grade' => 'SD1', 'contract_template_key' => 'developer_template'],
+            ['name' => 'Assistant Manager', 'grade' => 'D1', 'contract_template_key' => 'developer_template'],
             ['name' => 'HR Specialist', 'grade' => 'HR1', 'contract_template_key' => 'hr_template'],
             ['name' => 'Accountant', 'grade' => 'A1', 'contract_template_key' => 'accountant_template'],
+            ['name' => 'Cashier', 'grade' => 'C1', 'contract_template_key' => 'cashier_template'],
+            ['name' => 'Delivery Driver', 'grade' => 'D1', 'contract_template_key' => 'delivery_driver_template'],
+            ['name' => 'Kitchen Manager', 'grade' => 'K1', 'contract_template_key' => 'kitchen_manager_template'],
+            ['name' => 'Kitchen Staff', 'grade' => 'K2', 'contract_template_key' => 'kitchen_staff_template'],
+            ['name' => 'Waiter', 'grade' => 'W1', 'contract_template_key' => 'waiter_template'],
+            ['name' => 'Waitress', 'grade' => 'W2', 'contract_template_key' => 'waitress_template'],
+            ['name' => 'Bartender', 'grade' => 'B1', 'contract_template_key' => 'bartender_template'],
+            ['name' => 'Chef', 'grade' => 'C2', 'contract_template_key' => 'chef_template'],
+            ['name' => 'Pizza Maker', 'grade' => 'P1', 'contract_template_key' => 'pizza_maker_template'],
+            ['name' => 'Pizza Maker', 'grade' => 'P2', 'contract_template_key' => 'pizza_maker_template'],
+            ['name' => 'Pizza Maker', 'grade' => 'P3', 'contract_template_key' => 'pizza_maker_template'],
+            ['name' => 'Pizza Maker', 'grade' => 'P4', 'contract_template_key' => 'pizza_maker_template'],
         ];
 
         foreach ([$mainBranch, $northBranch, $southBranch] as $branch) {
