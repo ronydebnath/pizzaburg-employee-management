@@ -8,6 +8,8 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
 use App\Filament\Widgets\Portal\ProfileWidget;
+use App\Filament\Widgets\Portal\ContractWidget;
+use App\Filament\Pages\Portal\UpdateProfile;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -33,10 +35,12 @@ class EmployeePanelProvider extends PanelProvider
             ])
             ->pages([
                 Pages\Dashboard::class,
+                UpdateProfile::class,
             ])
             ->widgets([
                 Widgets\AccountWidget::class,
                 ProfileWidget::class,
+                ContractWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
