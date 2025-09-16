@@ -68,6 +68,20 @@ class User extends Authenticatable implements FilamentUser
      */
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
-        return $this->role === 'admin' && $this->status === 'active';
+        if ($this->status !== 'active') {
+            return false;
+        }
+
+        // Admin panel: only admins
+        if ($panel->getId() === 'admin') {
+            return $this->role === 'admin';
+        }
+
+        // Employee portal panel: allow any active user
+        if ($panel->getId() === 'portal') {
+            return true;
+        }
+
+        return false;
     }
 }
