@@ -5,6 +5,12 @@
 
 set -e
 
+# Configuration
+DB_NAME="refactorian"
+DB_USER="refactorian"
+# Use environment variable or default password
+DB_PASSWORD="${DB_PASSWORD:-refactorian}"
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -57,7 +63,7 @@ else
 fi
 
 # Check if database has tables
-TABLE_COUNT=$(docker compose exec -T db mysql -uburger -p6502JDjbyqv3 pizz-emp-management -e "SHOW TABLES;" 2>/dev/null | wc -l || echo "0")
+TABLE_COUNT=$(docker compose exec -T db mysql -u"$DB_USER" -p"$DB_PASSWORD" "$DB_NAME" -e "SHOW TABLES;" 2>/dev/null | wc -l || echo "0")
 if [ "$TABLE_COUNT" -gt 0 ]; then
     echo -e "${GREEN}✅ Database has $TABLE_COUNT tables${NC}"
 else

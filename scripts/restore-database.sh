@@ -6,9 +6,10 @@
 set -e
 
 # Configuration
-DB_NAME="pizz-emp-management"
-DB_USER="burger"
-DB_PASSWORD=""  # Change this to your actual database password
+DB_NAME="refactorian" # Change this to your actual database name
+DB_USER="refactorian"   # Change this to your actual database username
+# Use environment variable or default password
+DB_PASSWORD="${DB_PASSWORD:-refactorian}"
 CONTAINER_NAME="pizza-db-1"
 
 # Colors for output

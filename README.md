@@ -612,7 +612,7 @@ Your Docker setup is configured with **persistent storage** that survives contai
 #### Manual Backup Commands
 ```bash
 # SQL dump backup
-docker exec pizza-db-1 mysqldump -uburger -p6502JDjbyqv3 pizz-emp-management > backup.sql
+docker exec pizza-db-1 mysqldump -urefactorian -prefactorian refactorian > backup.sql
 
 # Compressed data backup
 tar -czf db_backup.tar.gz -C .docker/db data
@@ -621,7 +621,8 @@ tar -czf db_backup.tar.gz -C .docker/db data
 tar -czf redis_backup.tar.gz -C .docker/redis data
 
 # Application files backup
-tar -czf app_backup.tar.gz storage/app/public
+tar -czf app_backup.tar.gz storage/app/public storage/app/private
+
 ```
 
 #### Backup Schedule (Recommended)
@@ -681,9 +682,9 @@ vendor/bin/rector process    # Code refactoring
 
 ### Database Credentials (Docker)
 - **Server**: `db`
-- **Username**: `burger`
-- **Password**: `6502JDjbyqv3`
-- **Database**: `pizz-emp-management`
+- **Username**: `refactorian`
+- **Password**: `refactorian`
+- **Database**: `refactorian`
 
 ---
 
