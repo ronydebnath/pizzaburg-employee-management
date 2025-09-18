@@ -100,12 +100,15 @@ services:
     redis:
         image: redis:latest
         platform: linux/amd64
-        command: redis-server --appendonly yes
+        command: redis-server /etc/redis/redis.conf
         volumes:
             # Persistent Redis data - survives container rebuilds
             - .docker/redis/data:/data
-        ports:
-            - 6379:6379
+            # Redis configuration for security
+            - .docker/redis/redis.conf:/etc/redis/redis.conf
+        # NO PUBLIC PORTS - Redis only accessible from within Docker network
+        # ports:
+        #     - 6379:6379
         # Ensure data persistence and proper startup
         restart: unless-stopped
         healthcheck:
