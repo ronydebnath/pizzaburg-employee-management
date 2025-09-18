@@ -18,6 +18,14 @@
             </div>
         </div>
 
-        {{ $this->form }}
+        <x-filament-panels::form wire:submit="save">
+            {{ $this->form }}
+
+            <div class="mt-4">
+                <x-filament::button type="submit" color="success">
+                    Change Password
+                </x-filament::button>
+            </div>
+        </x-filament-panels::form>
     </div>
 </x-filament-panels::page>

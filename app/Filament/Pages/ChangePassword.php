@@ -75,6 +75,16 @@ class ChangePassword extends Page implements Forms\Contracts\HasForms
         ];
     }
 
+    protected function getFormActions(): array
+    {
+        return [
+            Action::make('save')
+                ->label('Change Password')
+                ->submit('save')
+                ->color('success'),
+        ];
+    }
+
     public function save(): void
     {
         try {
