@@ -194,12 +194,8 @@ class KycVerificationResource extends Resource
                             'approved_at' => now()->toISOString(),
                         ]);
                         
-                        // Create employee profile from KYC data
-                        $this->createEmployeeProfile($record);
-                        
-                        // Send onboarding invitation email
-                        $emailService = app(\App\Services\EmailService::class);
-                        $emailService->sendOnboardingInvitation($record->onboardingInvite);
+                        // Create employee profile from KYC data and send welcome email
+                        static::createEmployeeProfile($record);
                     })
                     ->visible(fn (KycVerification $record): bool => $record->status === 'pending_hr_review'),
                 
@@ -252,6 +248,9 @@ class KycVerificationResource extends Resource
     {
         $invite = $verification->onboardingInvite;
         
+        // Generate a random temporary password
+        $temporaryPassword = \Illuminate\Support\Str::random(12);
+        
         // Create or update user account
         $user = \App\Models\User::updateOrCreate(
             ['email' => $invite->email],
@@ -261,10 +260,14 @@ class KycVerificationResource extends Resource
                 'branch_id' => $invite->branch_id,
                 'role' => 'employee',
                 'status' => 'active',
+                'password' => bcrypt($temporaryPassword),
+                'must_change_password' => true,
             ]
         );
         
         // Create employee profile
+        $joiningDate = now()->toDateString(); // Set joining date to today
+        
         \App\Models\EmployeeProfile::updateOrCreate(
             ['user_id' => $user->id],
             [
@@ -273,8 +276,8 @@ class KycVerificationResource extends Resource
                 'first_name' => $verification->first_name,
                 'last_name' => $verification->last_name,
                 'date_of_birth' => $verification->date_of_birth,
-                'joining_date' => $invite->joining_date,
-                'effective_from' => $invite->joining_date,
+                'joining_date' => $joiningDate,
+                'effective_from' => $joiningDate,
                 'meta' => [
                     'national_id' => $verification->national_id,
                     'address' => $verification->address,
@@ -287,5 +290,9 @@ class KycVerificationResource extends Resource
         
         // Mark onboarding invite as completed
         $invite->update(['status' => 'completed']);
+        
+        // Send welcome email with temporary password
+        $emailService = app(\App\Services\EmailService::class);
+        $emailService->sendWelcomeEmailWithPassword($user, $temporaryPassword);
     }
 }

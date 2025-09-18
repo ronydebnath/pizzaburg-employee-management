@@ -32,12 +32,30 @@ class OnboardingInviteResource extends Resource
                             ->relationship('branch', 'name')
                             ->required()
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->reactive()
+                            ->afterStateUpdated(function ($state, callable $set) {
+                                // Clear position selection when branch changes
+                                $set('position_id', null);
+                            }),
                         Forms\Components\Select::make('position_id')
-                            ->relationship('position', 'name')
+                            ->options(function (callable $get) {
+                                $branchId = $get('branch_id');
+                                if (!$branchId) {
+                                    return [];
+                                }
+                                
+                                return \App\Models\Position::where('branch_id', $branchId)
+                                    ->where('is_active', true)
+                                    ->get()
+                                    ->mapWithKeys(function ($position) {
+                                        return [$position->id => $position->name . ' (' . $position->grade . ')'];
+                                    });
+                            })
                             ->required()
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->disabled(fn (callable $get) => !$get('branch_id')),
                         Forms\Components\TextInput::make('first_name')
                             ->required()
                             ->maxLength(255),
@@ -311,8 +329,8 @@ class OnboardingInviteResource extends Resource
                                 'first_name' => $data['first_name'],
                                 'last_name' => $data['last_name'],
                                 'date_of_birth' => $data['date_of_birth'],
-                                'joining_date' => $record->joining_date,
-                                'effective_from' => $record->joining_date,
+                                'joining_date' => now()->toDateString(),
+                                'effective_from' => now()->toDateString(),
                                 'meta' => [
                                     'national_id' => $data['national_id'],
                                     'address' => $data['address'],

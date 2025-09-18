@@ -27,6 +27,7 @@ class User extends Authenticatable implements FilamentUser
         'role',
         'status',
         'last_login_at',
+        'must_change_password',
     ];
 
     /**
@@ -50,6 +51,7 @@ class User extends Authenticatable implements FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'last_login_at' => 'datetime',
+            'must_change_password' => 'boolean',
         ];
     }
 

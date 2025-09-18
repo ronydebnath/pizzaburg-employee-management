@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Models\EmploymentContract;
 use App\Models\OnboardingInvite;
+use App\Models\User;
 use App\Mail\ContractNotificationMail;
+use App\Mail\WelcomeEmailWithPassword;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 
@@ -123,6 +125,39 @@ class EmailService
             Log::error('Failed to send onboarding invitation email', [
                 'invite_id' => $invite->id,
                 'email' => $invite->email,
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
+    }
+
+    /**
+     * Send welcome email with temporary password to new user
+     */
+    public function sendWelcomeEmailWithPassword(User $user, string $temporaryPassword): bool
+    {
+        try {
+            if (!$user->email) {
+                Log::warning('Cannot send welcome email: No email address', [
+                    'user_id' => $user->id,
+                ]);
+                return false;
+            }
+
+            Mail::to($user->email)->send(new WelcomeEmailWithPassword($user, $temporaryPassword));
+
+            Log::info('Welcome email with password sent', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+            ]);
+
+            return true;
+
+        } catch (\Exception $e) {
+            Log::error('Failed to send welcome email with password', [
+                'user_id' => $user->id,
+                'email' => $user->email ?? 'unknown',
                 'error' => $e->getMessage(),
             ]);
 

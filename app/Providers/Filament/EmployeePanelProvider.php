@@ -10,6 +10,8 @@ use Filament\Pages;
 use App\Filament\Widgets\Portal\ProfileWidget;
 use App\Filament\Widgets\Portal\ContractWidget;
 use App\Filament\Pages\Portal\UpdateProfile;
+use App\Filament\Pages\ChangePassword;
+use App\Http\Middleware\MustChangePasswordMiddleware;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
@@ -36,6 +38,7 @@ class EmployeePanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
                 UpdateProfile::class,
+                ChangePassword::class,
             ])
             ->widgets([
                 Widgets\AccountWidget::class,
@@ -52,6 +55,7 @@ class EmployeePanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                MustChangePasswordMiddleware::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

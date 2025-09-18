@@ -96,13 +96,13 @@ class EmploymentContractResource extends Resource
                                     '<p><strong>Phone:</strong> ' . $invite->phone . '</p>' .
                                     '<p><strong>Position:</strong> ' . ($invite->position->name ?? 'Not set') . '</p>' .
                                     '<p><strong>Branch:</strong> ' . ($invite->branch->name ?? 'Not set') . '</p>' .
-                                    '<p><strong>Joining Date:</strong> ' . ($invite->joining_date ? $invite->joining_date->format('M d, Y') : 'Not set') . '</p>' .
+                                    '<p><strong>Joining Date:</strong> ' . now()->format('M d, Y') . '</p>' .
                                     '</div>'
                                 );
                             })
                             ->visible(fn (callable $get) => !empty($get('onboarding_invite_id'))),
                         
-                        Forms\Components\Select::make('status')
+                        Forms\Cwomponents\Select::make('status')
                             ->options([
                                 'draft' => 'Draft',
                                 'sent' => 'Sent',
@@ -166,7 +166,7 @@ class EmploymentContractResource extends Resource
                                     'branch_address' => $invite->branch->address ?? 'N/A',
                                     'position_name' => $invite->position->name ?? 'Not set',
                                     'position_grade' => $invite->position->grade ?? 'N/A',
-                                    'start_date' => $invite->joining_date ? $invite->joining_date->format('M d, Y') : 'Not set',
+                                    'start_date' => now()->format('M d, Y'),
                                     'generated_date' => now()->format('M d, Y'),
                                     'salary' => $invite->position->salary ?? 'As per company policy',
                                 ];
