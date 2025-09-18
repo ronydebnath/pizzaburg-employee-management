@@ -30,7 +30,7 @@ class ContractController extends Controller
         try {
             // Find the onboarding invite by token
             $invite = OnboardingInvite::where('token', $token)
-                ->where('status', 'sent')
+                ->whereIn('status', ['sent', 'completed'])
                 ->where('expires_at', '>', now())
                 ->first();
 
@@ -55,9 +55,19 @@ class ContractController extends Controller
                 $this->contractService->generateContract($contract);
             }
 
+            // Get employee profile for additional data
+            $employeeProfile = null;
+            if ($invite->email) {
+                $user = \App\Models\User::where('email', $invite->email)->first();
+                if ($user) {
+                    $employeeProfile = \App\Models\EmployeeProfile::where('user_id', $user->id)->first();
+                }
+            }
+
             return view('contracts.show', [
                 'contract' => $contract,
                 'invite' => $invite,
+                'employeeProfile' => $employeeProfile,
             ]);
 
         } catch (\Exception $e) {
@@ -87,7 +97,7 @@ class ContractController extends Controller
 
             // Find the onboarding invite
             $invite = OnboardingInvite::where('token', $token)
-                ->where('status', 'sent')
+                ->whereIn('status', ['sent', 'completed'])
                 ->where('expires_at', '>', now())
                 ->first();
 

@@ -20,7 +20,7 @@
                             <p class="text-sm text-gray-600 mt-1">Contract #{{ $contract->contract_number }}</p>
                         </div>
                         <div class="text-right">
-                            <p class="text-sm text-gray-600">Generated: {{ $contract->created_at->format('M d, Y') }}</p>
+                            <p class="text-sm text-gray-600">Generated: {{ $contract->created_at ? $contract->created_at->format('M d, Y') : 'N/A' }}</p>
                             <p class="text-sm text-gray-600">Status: 
                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                     @if($contract->status === 'draft') bg-yellow-100 text-yellow-800
@@ -46,7 +46,7 @@
                         </div>
                         <div class="ml-3">
                             <h3 class="text-lg font-medium text-green-800">Contract Already Signed</h3>
-                            <p class="text-green-700 mt-1">This contract was signed on {{ $contract->signed_at->format('M d, Y \a\t g:i A') }}.</p>
+                            <p class="text-green-700 mt-1">This contract was signed on {{ $contract->signed_at ? $contract->signed_at->format('M d, Y \a\t g:i A') : 'N/A' }}.</p>
                             <div class="mt-4">
                                 <a href="{{ route('contract.download', $invite->token) }}" 
                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
@@ -101,7 +101,15 @@
                                     </div>
                                     <div>
                                         <dt class="text-sm font-medium text-gray-900">Start Date:</dt>
-                                        <dd class="text-sm text-gray-600">{{ $invite->joining_date->format('M d, Y') }}</dd>
+                                        <dd class="text-sm text-gray-600">
+                                            @if($employeeProfile && $employeeProfile->joining_date)
+                                                {{ $employeeProfile->joining_date->format('M d, Y') }}
+                                            @elseif($employeeProfile && $employeeProfile->effective_from)
+                                                {{ $employeeProfile->effective_from->format('M d, Y') }}
+                                            @else
+                                                {{ now()->format('M d, Y') }}
+                                            @endif
+                                        </dd>
                                     </div>
                                 </dl>
                             </div>
@@ -123,7 +131,15 @@
                             <ul class="mt-4 space-y-2 text-gray-700">
                                 <li class="flex items-start">
                                     <span class="flex-shrink-0 h-5 w-5 text-green-500 mt-0.5">•</span>
-                                    <span class="ml-2">You will commence employment on {{ $invite->joining_date->format('M d, Y') }}</span>
+                                    <span class="ml-2">You will commence employment on 
+                                        @if($employeeProfile && $employeeProfile->joining_date)
+                                            {{ $employeeProfile->joining_date->format('M d, Y') }}
+                                        @elseif($employeeProfile && $employeeProfile->effective_from)
+                                            {{ $employeeProfile->effective_from->format('M d, Y') }}
+                                        @else
+                                            {{ now()->format('M d, Y') }}
+                                        @endif
+                                    </span>
                                 </li>
                                 <li class="flex items-start">
                                     <span class="flex-shrink-0 h-5 w-5 text-green-500 mt-0.5">•</span>
