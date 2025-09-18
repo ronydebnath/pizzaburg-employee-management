@@ -55,6 +55,7 @@ class ContractTemplate extends Model
         $content = $this->content;
         
         foreach ($data as $key => $value) {
+            // Replace double curly brace format {{variable}}
             $content = str_replace("{{$key}}", $value, $content);
         }
         

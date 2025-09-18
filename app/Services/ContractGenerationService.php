@@ -7,6 +7,7 @@ use App\Models\OnboardingInvite;
 use App\Models\ContractTemplate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ContractGenerationService
 {
@@ -98,7 +99,9 @@ class ContractGenerationService
                 'position_grade' => $invite->position?->grade ?? 'N/A',
                 'generated_date' => now()->format('M d, Y'),
                 'signed_date' => $contract->signed_at?->format('M d, Y') ?? now()->format('M d, Y'),
+                'effective_date' => $contract->contract_data['start_date'] ?? now()->format('M d, Y'),
                 'signature_image' => $contract->signature_file_path,
+                'hr_signature_image' => Storage::exists('hr-signatures/hr-signature.png') ? 'hr-signatures/hr-signature.png' : null,
             ], $contract->contract_data ?? []);
             
             // Generate signed PDF content
@@ -141,13 +144,14 @@ class ContractGenerationService
         <head>
             <title>Employment Contract - {$data['contract_number']}</title>
             <style>
-                body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; }
+                body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; color: #333; }
                 .header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid #333; padding-bottom: 20px; }
                 .contract-content { margin-bottom: 30px; }
                 .signature-section { margin-top: 50px; border-top: 1px solid #ccc; padding-top: 20px; }
                 .signature-line { margin: 20px 0; }
-                h1 { color: #333; margin-bottom: 10px; }
-                h2 { color: #666; margin-bottom: 20px; }
+                .contract-info { background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
+                h1 { color: #333; margin-bottom: 10px; font-size: 24px; }
+                h2 { color: #666; margin-bottom: 20px; font-size: 18px; }
                 h3 { color: #333; border-bottom: 1px solid #eee; padding-bottom: 5px; }
                 p { margin: 10px 0; }
                 strong { color: #333; }
@@ -160,6 +164,18 @@ class ContractGenerationService
                 <p>Generated on: {$data['generated_date']}</p>
             </div>
             
+            <div class='contract-info'>
+                <h3>Contract Information</h3>
+                <p><strong>Employee Name:</strong> {$data['employee_name']}</p>
+                <p><strong>Employee Email:</strong> {$data['employee_email']}</p>
+                <p><strong>Employee Phone:</strong> {$data['employee_phone']}</p>
+                <p><strong>Position:</strong> {$data['position_name']} (Grade: {$data['position_grade']})</p>
+                <p><strong>Branch:</strong> {$data['branch_name']}</p>
+                <p><strong>Branch Address:</strong> {$data['branch_address']}</p>
+                <p><strong>Start Date:</strong> {$data['start_date']}</p>
+                <p><strong>Salary:</strong> {$data['salary']}</p>
+            </div>
+            
             <div class='contract-content'>
                 {$renderedContent}
             </div>
@@ -167,10 +183,14 @@ class ContractGenerationService
             <div class='signature-section'>
                 <h3>Signatures</h3>
                 <div class='signature-line'>
-                    <p>Employee Signature: _________________________ Date: ___________</p>
+                    <p><strong>Employee Signature:</strong></p>
+                    <p style='margin-top: 40px; border-bottom: 1px solid #333; width: 300px;'></p>
+                    <p>Date: _________________________</p>
                 </div>
                 <div class='signature-line'>
-                    <p>HR Representative: _________________________ Date: ___________</p>
+                    <p><strong>HR Representative Signature:</strong></p>
+                    <p style='margin-top: 40px; border-bottom: 1px solid #333; width: 300px;'></p>
+                    <p>Date: _________________________</p>
                 </div>
             </div>
         </body>
@@ -231,9 +251,16 @@ class ContractGenerationService
             
             <div class='signature-section'>
                 <h3>Digital Signatures</h3>
-                <p><strong>Employee Signature:</strong></p>
-                <img src='{$data['signature_image']}' class='signature-image' alt='Employee Signature' />
-                <p><strong>Signed Date:</strong> {$data['signed_date']}</p>
+                <div class='signature-line'>
+                    <p><strong>Employee Signature:</strong></p>
+                    " . ($data['signature_image'] ? "<img src='data:image/png;base64," . base64_encode(Storage::get($data['signature_image'])) . "' class='signature-image' alt='Employee Signature' />" : "<p style='margin-top: 40px; border-bottom: 1px solid #333; width: 300px;'></p>") . "
+                    <p><strong>Signed Date:</strong> {$data['signed_date']}</p>
+                </div>
+                <div class='signature-line'>
+                    <p><strong>HR Representative Signature:</strong></p>
+                    " . ($data['hr_signature_image'] ? "<img src='data:image/png;base64," . base64_encode(Storage::get($data['hr_signature_image'])) . "' class='signature-image' alt='HR Representative Signature' />" : "<p style='margin-top: 40px; border-bottom: 1px solid #333; width: 300px;'></p>") . "
+                    <p><strong>Date:</strong> {$data['signed_date']}</p>
+                </div>
             </div>
         </body>
         </html>";
@@ -248,9 +275,12 @@ class ContractGenerationService
     {
         $filename = "contracts/{$contract->contract_number}.pdf";
         
-        // TODO: Convert HTML to PDF and save
-        // For now, save as HTML file
-        Storage::put($filename, $content);
+        // Generate PDF from HTML content
+        $pdf = Pdf::loadHTML($content);
+        $pdf->setPaper('A4', 'portrait');
+        
+        // Save PDF to storage
+        Storage::put($filename, $pdf->output());
         
         return $filename;
     }
@@ -262,9 +292,12 @@ class ContractGenerationService
     {
         $filename = "contracts/signed/{$contract->contract_number}_signed.pdf";
         
-        // TODO: Convert HTML to PDF and save
-        // For now, save as HTML file
-        Storage::put($filename, $content);
+        // Generate PDF from HTML content
+        $pdf = Pdf::loadHTML($content);
+        $pdf->setPaper('A4', 'portrait');
+        
+        // Save PDF to storage
+        Storage::put($filename, $pdf->output());
         
         return $filename;
     }
