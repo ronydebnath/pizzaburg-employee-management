@@ -9,7 +9,9 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
 use App\Filament\Widgets\Portal\ProfileWidget;
 use App\Filament\Widgets\Portal\ContractWidget;
+use App\Filament\Pages\Portal\Dashboard;
 use App\Filament\Pages\Portal\UpdateProfile;
+use App\Filament\Pages\Portal\Settings;
 use App\Filament\Pages\ChangePassword;
 use App\Http\Middleware\MustChangePasswordMiddleware;
 use Filament\Panel;
@@ -36,8 +38,8 @@ class EmployeePanelProvider extends PanelProvider
                 'primary' => Color::Amber,
             ])
             ->pages([
-                Pages\Dashboard::class,
-                UpdateProfile::class,
+                Dashboard::class,
+                Settings::class,
                 ChangePassword::class,
             ])
             ->widgets([
