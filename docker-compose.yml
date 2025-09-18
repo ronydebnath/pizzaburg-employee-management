@@ -4,7 +4,9 @@ services:
     # PHP
     ####################################################################################################
     php:
-        build: .docker/php
+        build:
+            context: .
+            dockerfile: .docker/php/Dockerfile
         ports:
             - 5173:5173
         volumes:

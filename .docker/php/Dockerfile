@@ -20,8 +20,8 @@ RUN apt-get install -y libicu-dev \
 
 # gd
 RUN apt-get install -y libfreetype6-dev libjpeg62-turbo-dev libpng-dev && \
-docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ && \
-docker-php-ext-install gd
+ docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ && \
+ docker-php-ext-install gd
 
 # redis
 RUN pecl install redis && docker-php-ext-enable redis
@@ -60,6 +60,21 @@ RUN git clone https://github.com/seebi/dircolors-solarized
 
 EXPOSE 5173
 WORKDIR /var/www
+
+# Copy application source with correct ownership into the image
+# Use UID 1000 to match the host user (pburg)
+COPY --chown=1000:1000 . /var/www
+
+# Ensure proper ownership for all files created during container operations
+RUN chown -R 1000:1000 /var/www
+
+# Create a user with UID 1000 to match host user
+RUN useradd -u 1000 -m -s /bin/bash pburg || true
+RUN usermod -aG www-data pburg || true
+
+# Set ownership for common directories that might be created
+RUN mkdir -p /var/www/storage/logs /var/www/bootstrap/cache /var/www/storage/framework/cache /var/www/storage/framework/sessions /var/www/storage/framework/views
+RUN chown -R 1000:1000 /var/www/storage /var/www/bootstrap/cache
 
 #entrypoint
 ENTRYPOINT ["entrypoint.sh"]

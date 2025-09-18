@@ -2,8 +2,12 @@
 set -e
 
 # Set permissions for Laravel directories
-chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
+# Use UID 1000 to match the host user (pburg)
+chown -R 1000:1000 /var/www/storage /var/www/bootstrap/cache
 chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
+# Ensure all project files have correct ownership
+chown -R 1000:1000 /var/www
 
 # permissions for PHPMyAdmin
 mkdir -p /sessions

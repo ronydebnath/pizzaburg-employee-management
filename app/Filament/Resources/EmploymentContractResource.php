@@ -102,7 +102,7 @@ class EmploymentContractResource extends Resource
                             })
                             ->visible(fn (callable $get) => !empty($get('onboarding_invite_id'))),
                         
-                        Forms\Cwomponents\Select::make('status')
+                        Forms\Components\Select::make('status')
                             ->options([
                                 'draft' => 'Draft',
                                 'sent' => 'Sent',

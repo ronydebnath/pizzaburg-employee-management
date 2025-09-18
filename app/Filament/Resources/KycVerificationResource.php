@@ -268,6 +268,9 @@ class KycVerificationResource extends Resource
         // Create employee profile
         $joiningDate = now()->toDateString(); // Set joining date to today
         
+        // Generate a deterministic, unique employee_id based on user id
+        $generatedEmployeeId = sprintf('EMP-%06d', $user->id);
+        
         \App\Models\EmployeeProfile::updateOrCreate(
             ['user_id' => $user->id],
             [
@@ -276,6 +279,7 @@ class KycVerificationResource extends Resource
                 'first_name' => $verification->first_name,
                 'last_name' => $verification->last_name,
                 'date_of_birth' => $verification->date_of_birth,
+                'employee_id' => $generatedEmployeeId,
                 'joining_date' => $joiningDate,
                 'effective_from' => $joiningDate,
                 'meta' => [
