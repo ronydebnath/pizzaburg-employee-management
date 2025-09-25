@@ -12,9 +12,7 @@ class Contracts extends Page
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
 
     protected static ?string $navigationLabel = 'My Contract';
-
-    protected static ?string $navigationGroup = 'Employment';
-
+    protected static ?string $navigationGroup = 'Self Service';
     protected static ?int $navigationSort = 20;
 
     protected static string $view = 'filament.portal.pages.contracts';

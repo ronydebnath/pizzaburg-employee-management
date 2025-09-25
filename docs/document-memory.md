@@ -19,6 +19,7 @@ This log captures the key actions completed during the current documentation pas
 - Added HR-side handling to approve those updates without forcing a new contract (or welcome email) while still respecting the existing onboarding flow for fresh hires.
 - Patched the employee update form to back its state with an array (`$data`) so Livewire no longer complains about missing component properties.
 - Removed the legacy profile/contract widgets from the employee portal dashboard so the layout now only shows the account widget (clean slate for future cards).
+- Reordered the portal sidebar grouping to "Self Service" with Dashboard, Update Profile (sort 10), and My Contract (sort 20) for clearer navigation.
 
 ## Notes for Future Sessions
 - Address the routing gap for `OnboardingInvite::getInviteUrlAttribute` before relying on invite-generated URLs.

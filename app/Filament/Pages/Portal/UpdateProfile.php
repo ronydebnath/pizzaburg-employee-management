@@ -22,6 +22,8 @@ class UpdateProfile extends Page implements Forms\Contracts\HasForms
     protected static ?string $title = 'Update Profile';
     protected static string $view = 'filament.portal.pages.update-profile';
     protected static bool $shouldRegisterNavigation = true;
+    protected static ?string $navigationGroup = 'Self Service';
+    protected static ?int $navigationSort = 10;
 
     public ?int $profile_id = null;
 
