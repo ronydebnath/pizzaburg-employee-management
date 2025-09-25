@@ -11,7 +11,7 @@ use App\Filament\Widgets\Portal\ProfileWidget;
 use App\Filament\Widgets\Portal\ContractWidget;
 use App\Filament\Pages\Portal\Dashboard;
 use App\Filament\Pages\Portal\UpdateProfile;
-use App\Filament\Pages\Portal\Settings;
+use App\Filament\Pages\Portal\Contracts;
 use App\Filament\Pages\ChangePassword;
 use App\Http\Middleware\MustChangePasswordMiddleware;
 use Filament\Panel;
@@ -39,7 +39,8 @@ class EmployeePanelProvider extends PanelProvider
             ])
             ->pages([
                 Dashboard::class,
-                Settings::class,
+                UpdateProfile::class,
+                Contracts::class,
                 ChangePassword::class,
             ])
             ->widgets([
@@ -64,5 +65,4 @@ class EmployeePanelProvider extends PanelProvider
             ]);
     }
 }
-
 

@@ -13,6 +13,7 @@ This log captures the key actions completed during the current documentation pas
 - Adjusted KYC verification image thumbnails (profile & national ID) to use signed routes so previews render correctly.
 - Fixed HR Fill KYC workflow by auto-generating an `employee_id` before creating employee profiles.
 - Ensured Filament uploads for HR/admin KYC use the `private` disk so image links resolve via the secure download route.
+- Updated employee portal navigation: removed Settings, exposed Update Profile, and added a My Contract page with download actions.
 
 ## Notes for Future Sessions
 - Address the routing gap for `OnboardingInvite::getInviteUrlAttribute` before relying on invite-generated URLs.
