@@ -14,6 +14,10 @@ This log captures the key actions completed during the current documentation pas
 - Fixed HR Fill KYC workflow by auto-generating an `employee_id` before creating employee profiles.
 - Ensured Filament uploads for HR/admin KYC use the `private` disk so image links resolve via the secure download route.
 - Updated employee portal navigation: removed Settings, exposed Update Profile, and added a My Contract page with download actions.
+- Fixed password storage by relying on the model's `hashed` cast (UserResource, HR auto-provision, and change-password flow) so employee logins respect newly set credentials.
+- Expanded the employee portal Update Profile page to show current details, accept edits (including ID uploads), and submit them as a new `profile_update` KYC verification for HR review.
+- Added HR-side handling to approve those updates without forcing a new contract (or welcome email) while still respecting the existing onboarding flow for fresh hires.
+- Patched the employee update form to back its state with an array (`$data`) so Livewire no longer complains about missing component properties.
 
 ## Notes for Future Sessions
 - Address the routing gap for `OnboardingInvite::getInviteUrlAttribute` before relying on invite-generated URLs.

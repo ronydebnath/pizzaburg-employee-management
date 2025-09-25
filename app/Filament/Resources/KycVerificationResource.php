@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 
 class KycVerificationResource extends Resource
@@ -255,7 +256,50 @@ class KycVerificationResource extends Resource
     private static function createEmployeeProfile(KycVerification $verification): void
     {
         $invite = $verification->onboardingInvite;
-        
+
+        if (!$invite) {
+            return;
+        }
+
+        if ($verification->type === 'profile_update') {
+            $user = \App\Models\User::where('email', $invite->email)->first();
+
+            if (!$user) {
+                return;
+            }
+
+            $user->update(array_filter([
+                'name' => trim(($verification->first_name ?? '') . ' ' . ($verification->last_name ?? '')) ?: $user->name,
+            ]));
+
+            $profile = \App\Models\EmployeeProfile::firstOrCreate(
+                ['user_id' => $user->id],
+                ['branch_id' => $invite->branch_id]
+            );
+
+            $meta = $profile->meta ?? [];
+
+            $profile->update(array_filter([
+                'first_name' => $verification->first_name,
+                'last_name' => $verification->last_name,
+                'date_of_birth' => $verification->date_of_birth,
+                'profile_image_path' => $verification->profile_image_path ?? $profile->profile_image_path,
+            ], fn ($value) => !is_null($value)));
+
+            $profile->fill([
+                'meta' => array_merge($meta, array_filter([
+                    'national_id' => $verification->national_id,
+                    'address' => $verification->address,
+                    'emergency_contact_name' => $verification->emergency_contact_name,
+                    'emergency_contact_phone' => $verification->emergency_contact_phone,
+                    'national_id_photo_path' => $verification->document_image_path ?? Arr::get($meta, 'national_id_photo_path'),
+                    'last_employee_update_verification_id' => $verification->id,
+                ])),
+            ])->save();
+
+            return;
+        }
+
         // Generate a random temporary password
         $temporaryPassword = \Illuminate\Support\Str::random(12);
         
@@ -268,7 +312,7 @@ class KycVerificationResource extends Resource
                 'branch_id' => $invite->branch_id,
                 'role' => 'employee',
                 'status' => 'active',
-                'password' => bcrypt($temporaryPassword),
+                'password' => $temporaryPassword,
                 'must_change_password' => true,
             ]
         );
