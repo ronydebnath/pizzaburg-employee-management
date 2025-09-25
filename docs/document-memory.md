@@ -18,6 +18,7 @@ This log captures the key actions completed during the current documentation pas
 - Expanded the employee portal Update Profile page to show current details, accept edits (including ID uploads), and submit them as a new `profile_update` KYC verification for HR review.
 - Added HR-side handling to approve those updates without forcing a new contract (or welcome email) while still respecting the existing onboarding flow for fresh hires.
 - Patched the employee update form to back its state with an array (`$data`) so Livewire no longer complains about missing component properties.
+- Removed the legacy profile/contract widgets from the employee portal dashboard so the layout now only shows the account widget (clean slate for future cards).
 
 ## Notes for Future Sessions
 - Address the routing gap for `OnboardingInvite::getInviteUrlAttribute` before relying on invite-generated URLs.

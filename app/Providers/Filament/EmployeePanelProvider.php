@@ -7,8 +7,6 @@ use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages;
-use App\Filament\Widgets\Portal\ProfileWidget;
-use App\Filament\Widgets\Portal\ContractWidget;
 use App\Filament\Pages\Portal\Dashboard;
 use App\Filament\Pages\Portal\UpdateProfile;
 use App\Filament\Pages\Portal\Contracts;
@@ -45,8 +43,6 @@ class EmployeePanelProvider extends PanelProvider
             ])
             ->widgets([
                 Widgets\AccountWidget::class,
-                ProfileWidget::class,
-                ContractWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -65,4 +61,3 @@ class EmployeePanelProvider extends PanelProvider
             ]);
     }
 }
-
