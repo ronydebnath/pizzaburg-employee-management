@@ -277,16 +277,34 @@ class OnboardingInviteResource extends Resource
                             ])
                             ->columns(2),
                         
-                        Forms\Components\Section::make('Profile Photo')
+                        Forms\Components\Section::make('Identity Documents')
                             ->schema([
                                 Forms\Components\FileUpload::make('profile_photo')
                                     ->label('Upload Profile Photo')
                                     ->image()
                                     ->directory('kyc/profiles')
                                     ->visibility('private'),
-                            ]),
+                                Forms\Components\FileUpload::make('national_id_photo')
+                                    ->label('Upload National ID')
+                                    ->image()
+                                    ->directory('kyc/documents')
+                                    ->visibility('private')
+                                    ->helperText('Upload a clear image of the employee\'s national ID (front side).'),
+                            ])
+                            ->columns(2),
                     ])
                     ->action(function (OnboardingInvite $record, array $data) {
+                        $extractFilePath = function ($value) {
+                            if (is_array($value)) {
+                                return $value['path'] ?? ($value[0]['path'] ?? null);
+                            }
+
+                            return $value;
+                        };
+
+                        $profilePhotoPath = $extractFilePath($data['profile_photo'] ?? null);
+                        $nationalIdPhotoPath = $extractFilePath($data['national_id_photo'] ?? null);
+
                         // Create KYC verification record
                         $kycVerification = $record->kycVerifications()->create([
                             'verification_id' => 'KYC-' . strtoupper(\Illuminate\Support\Str::random(12)),
@@ -300,7 +318,8 @@ class OnboardingInviteResource extends Resource
                             'address' => $data['address'],
                             'emergency_contact_name' => $data['emergency_contact_name'],
                             'emergency_contact_phone' => $data['emergency_contact_phone'],
-                            'profile_image_path' => $data['profile_photo'] ?? null,
+                            'profile_image_path' => $profilePhotoPath,
+                            'document_image_path' => $nationalIdPhotoPath,
                             'verified_at' => now(),
                             'verification_data' => [
                                 'filled_by' => Auth::user()?->name ?? 'HR Admin',
@@ -334,11 +353,12 @@ class OnboardingInviteResource extends Resource
                                 'meta' => [
                                     'national_id' => $data['national_id'],
                                     'address' => $data['address'],
-                                    'emergency_contact_name' => $data['emergency_contact_name'],
-                                    'emergency_contact_phone' => $data['emergency_contact_phone'],
-                                    'kyc_verification_id' => $kycVerification->id,
-                                    'filled_by_hr' => true,
-                                ],
+                                'emergency_contact_name' => $data['emergency_contact_name'],
+                                'emergency_contact_phone' => $data['emergency_contact_phone'],
+                                'kyc_verification_id' => $kycVerification->id,
+                                'filled_by_hr' => true,
+                                'national_id_photo_path' => $nationalIdPhotoPath,
+                            ],
                             ]
                         );
                         

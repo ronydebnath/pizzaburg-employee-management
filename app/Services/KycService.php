@@ -49,6 +49,12 @@ class KycService
                 $profileData['profile_image_path'] = $profileImagePath;
             }
 
+            // Handle national ID document upload
+            if (isset($data['national_id_photo']) && $data['national_id_photo']) {
+                $documentPath = $this->saveDocumentImage($verification, $data['national_id_photo']);
+                $profileData['document_image_path'] = $documentPath;
+            }
+
             // Update verification with profile data
             $verification->update($profileData);
 
@@ -160,6 +166,17 @@ class KycService
         $path = $file->storeAs('kyc/profiles', $verification->verification_id . '_profile.' . $file->getClientOriginalExtension());
 
         return $path;
+    }
+
+    /**
+     * Save national ID document image from uploaded file
+     */
+    private function saveDocumentImage(KycVerification $verification, $file): string
+    {
+        $extension = $file->getClientOriginalExtension();
+        $filename = $verification->verification_id . '_national_id.' . $extension;
+
+        return $file->storeAs('kyc/documents', $filename);
     }
 
 

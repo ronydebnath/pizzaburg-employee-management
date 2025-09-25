@@ -87,11 +87,21 @@ class ViewKycVerification extends ViewRecord
                     ->schema([
                         Infolists\Components\ImageEntry::make('profile_image_path')
                             ->label('Profile Image')
-                            ->disk('private')
                             ->height(200)
+                            ->width(200)
                             ->placeholder('No profile image uploaded')
-                            ->extraAttributes(['class' => 'rounded-lg cursor-pointer'])
+                            ->extraAttributes(['class' => 'rounded-lg object-cover border cursor-pointer'])
+                            ->getStateUsing(fn ($record) => $record->profile_image_path ? route('private.file', ['path' => $record->profile_image_path]) : null)
                             ->url(fn ($record) => $record->profile_image_path ? route('private.file', ['path' => $record->profile_image_path]) : null)
+                            ->openUrlInNewTab(),
+                        Infolists\Components\ImageEntry::make('document_image_path')
+                            ->label('National ID Image')
+                            ->height(200)
+                            ->width(200)
+                            ->placeholder('No national ID uploaded')
+                            ->extraAttributes(['class' => 'rounded-lg object-cover border cursor-pointer'])
+                            ->getStateUsing(fn ($record) => $record->document_image_path ? route('private.file', ['path' => $record->document_image_path]) : null)
+                            ->url(fn ($record) => $record->document_image_path ? route('private.file', ['path' => $record->document_image_path]) : null)
                             ->openUrlInNewTab(),
                         
                     ])

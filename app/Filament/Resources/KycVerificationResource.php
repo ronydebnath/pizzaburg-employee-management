@@ -99,7 +99,13 @@ class KycVerificationResource extends Resource
                             ->image()
                             ->directory('kyc/profiles')
                             ->visibility('private'),
-                        
+                        Forms\Components\FileUpload::make('document_image_path')
+                            ->label('National ID Image')
+                            ->image()
+                            ->directory('kyc/documents')
+                            ->visibility('private')
+                            ->helperText('Upload a clear photo of the candidate\'s national ID.'),
+
                     ])
                     ->columns(1),
                 

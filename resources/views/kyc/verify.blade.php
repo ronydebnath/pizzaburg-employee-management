@@ -152,7 +152,7 @@
                     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                         <div class="px-6 py-4 border-b border-gray-200">
                             <h2 class="text-lg font-semibold text-gray-900">Profile Photo</h2>
-                            <p class="text-sm text-gray-600 mt-1">Upload your profile photo</p>
+                            <p class="text-sm text-gray-600 mt-1">Upload your profile photo and a clear photo of your national ID.</p>
                         </div>
                         <div class="px-6 py-4">
                             <!-- Photo Upload Options -->
@@ -162,6 +162,13 @@
                                     <label for="profile_photo" class="block text-sm font-medium text-gray-700">Upload Photo</label>
                                     <input type="file" id="profile_photo" name="profile_photo" accept="image/*" 
                                            class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                </div>
+
+                                <div>
+                                    <label for="national_id_photo" class="block text-sm font-medium text-gray-700">Upload National ID</label>
+                                    <input type="file" id="national_id_photo" name="national_id_photo" accept="image/*" 
+                                           class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                                    <p class="mt-1 text-xs text-gray-500">Capture the front side clearly. If a back side is required, combine into a single image before uploading.</p>
                                 </div>
                                 
                                 <!-- OR Divider -->
@@ -254,6 +261,11 @@
                 const profilePhoto = document.getElementById('profile_photo').files[0];
                 if (profilePhoto) {
                     formData.append('profile_photo', profilePhoto);
+                }
+
+                const nationalIdPhoto = document.getElementById('national_id_photo').files[0];
+                if (nationalIdPhoto) {
+                    formData.append('national_id_photo', nationalIdPhoto);
                 }
 
                 fetch('{{ route("kyc.verify", $invite->token) }}', {
