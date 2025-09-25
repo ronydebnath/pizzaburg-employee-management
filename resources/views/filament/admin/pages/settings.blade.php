@@ -6,7 +6,15 @@
                 <p class="text-gray-600">Manage your admin account details and HR signature.</p>
             </div>
 
-            {{ $this->form }}
+            <x-filament-panels::form wire:submit="save">
+                {{ $this->form }}
+
+                <div class="mt-6 flex justify-end">
+                    <x-filament::button type="submit" color="success">
+                        Save Changes
+                    </x-filament::button>
+                </div>
+            </x-filament-panels::form>
         </div>
     </div>
 </x-filament-panels::page>

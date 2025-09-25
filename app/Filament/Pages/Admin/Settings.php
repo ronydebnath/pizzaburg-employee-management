@@ -3,6 +3,7 @@
 namespace App\Filament\Pages\Admin;
 
 use App\Models\EmployeeProfile;
+use Filament\Actions;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
@@ -22,17 +23,28 @@ class Settings extends Page implements Forms\Contracts\HasForms
     protected static ?int $navigationSort = 100;
 
     public array|string|null $profile_image_path = null;
+    public array|string|null $hr_signature = null;
+    public ?string $name = null;
+    public ?string $email = null;
+    public ?string $phone = null;
 
     public function mount(): void
     {
         $user = Auth::user();
         $profile = EmployeeProfile::where('user_id', $user->id)->first();
 
+        $this->name = $user->name;
+        $this->email = $user->email;
+        $this->phone = $user->phone;
+        $this->profile_image_path = $profile?->profile_image_path;
+        $this->hr_signature = Storage::exists('hr-signatures/hr-signature.png') ? 'hr-signatures/hr-signature.png' : null;
+
         $this->form->fill([
-            'name' => $user->name,
-            'email' => $user->email,
-            'phone' => $user->phone,
-            'profile_image_path' => $profile?->profile_image_path,
+            'name' => $this->name,
+            'email' => $this->email,
+            'phone' => $this->phone,
+            'profile_image_path' => $this->profile_image_path,
+            'hr_signature' => $this->hr_signature,
         ]);
     }
 
@@ -78,7 +90,6 @@ class Settings extends Page implements Forms\Contracts\HasForms
                                             ->label('HR Signature Image')
                                             ->image()
                                             ->directory('hr-signatures')
-                                            ->filename('hr-signature')
                                             ->preserveFilenames(false)
                                             ->acceptedFileTypes(['image/png', 'image/jpeg', 'image/jpg'])
                                             ->maxSize(2048)
@@ -108,12 +119,13 @@ class Settings extends Page implements Forms\Contracts\HasForms
             ]);
     }
 
-    protected function getActions(): array
+    protected function getFormActions(): array
     {
         return [
-            Forms\Components\Actions\Action::make('save')
+            Actions\Action::make('save')
                 ->label('Save Changes')
-                ->submit('save'),
+                ->submit('save')
+                ->color('success'),
         ];
     }
 
