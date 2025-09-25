@@ -42,6 +42,8 @@ class ContractGenerationService
                 'start_date' => $contract->contract_data['start_date'] ?? now()->format('M d, Y'),
                 'generated_date' => now()->format('M d, Y'),
                 'salary' => $invite->position?->salary ?? 'As per company policy',
+                'hr_signature_image' => Storage::exists('hr-signatures/hr-signature.png') ? 'hr-signatures/hr-signature.png' : null,
+                'hr_signature_date' => now()->format('M d, Y'),
             ], $contract->contract_data ?? []);
             
             // Render template content with data
@@ -102,6 +104,7 @@ class ContractGenerationService
                 'effective_date' => $contract->contract_data['start_date'] ?? now()->format('M d, Y'),
                 'signature_image' => $contract->signature_file_path,
                 'hr_signature_image' => Storage::exists('hr-signatures/hr-signature.png') ? 'hr-signatures/hr-signature.png' : null,
+                'hr_signature_date' => now()->format('M d, Y'),
             ], $contract->contract_data ?? []);
             
             // Generate signed PDF content
@@ -189,8 +192,8 @@ class ContractGenerationService
                 </div>
                 <div class='signature-line'>
                     <p><strong>HR Representative Signature:</strong></p>
-                    <p style='margin-top: 40px; border-bottom: 1px solid #333; width: 300px;'></p>
-                    <p>Date: _________________________</p>
+                    " . ($data['hr_signature_image'] ? "<img src='data:image/png;base64," . base64_encode(Storage::get($data['hr_signature_image'])) . "' style='max-height: 80px;' alt='HR Signature' />" : "<p style='margin-top: 40px; border-bottom: 1px solid #333; width: 300px;'></p>") . "
+                    <p>Date: " . ($data['hr_signature_image'] ? ($data['hr_signature_date'] ?? now()->format('M d, Y')) : '_________________________') . "</p>
                 </div>
             </div>
         </body>

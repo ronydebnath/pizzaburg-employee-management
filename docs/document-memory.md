@@ -20,6 +20,8 @@ This log captures the key actions completed during the current documentation pas
 - Patched the employee update form to back its state with an array (`$data`) so Livewire no longer complains about missing component properties.
 - Removed the legacy profile/contract widgets from the employee portal dashboard so the layout now only shows the account widget (clean slate for future cards).
 - Reordered the portal sidebar grouping to "Self Service" with Dashboard, Update Profile (sort 10), and My Contract (sort 20) for clearer navigation.
+- Fixed admin settings profile bootstrap so the first employee profile gets required fields (name, employee ID, joining dates) and no longer trips DB defaults.
+- Display the stored HR signature in admin settings (with status badge and live preview) and embed it in newly generated contract PDFs.
 
 ## Notes for Future Sessions
 - Address the routing gap for `OnboardingInvite::getInviteUrlAttribute` before relying on invite-generated URLs.

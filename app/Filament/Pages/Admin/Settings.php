@@ -10,6 +10,8 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 
 class Settings extends Page implements Forms\Contracts\HasForms
 {
@@ -107,9 +109,22 @@ class Settings extends Page implements Forms\Contracts\HasForms
                                             ->label('Current Signature Status')
                                             ->content(function () {
                                                 $hasSignature = Storage::exists('hr-signatures/hr-signature.png');
-                                                return $hasSignature
-                                                    ? '✅ Signature uploaded and ready for contracts'
-                                                    : '❌ No signature uploaded yet';
+
+                                                if (!$hasSignature) {
+                                                    return new \Illuminate\Support\HtmlString('<div class="text-sm text-gray-600">❌ No signature uploaded yet</div>');
+                                                }
+
+                                                $url = Storage::url('hr-signatures/hr-signature.png');
+                                                $timestamp = Storage::lastModified('hr-signatures/hr-signature.png');
+                                                $updatedAt = $timestamp ? Carbon::createFromTimestamp($timestamp) : null;
+
+                                                return new \Illuminate\Support\HtmlString(
+                                                    '<div class="space-y-3">'
+                                                    . '<div class="text-sm text-emerald-600">✅ Signature uploaded and ready for contracts</div>'
+                                                    . '<div><img src="' . e($url) . '" alt="HR Signature" class="max-h-24 border rounded-md bg-white"></div>'
+                                                    . '<div class="text-xs text-gray-500">' . ($updatedAt ? 'Last updated ' . $updatedAt->diffForHumans() : '') . '</div>'
+                                                    . '</div>'
+                                                );
                                             })
                                             ->columnSpanFull(),
                                     ]),
@@ -142,7 +157,14 @@ class Settings extends Page implements Forms\Contracts\HasForms
 
         $profile = EmployeeProfile::firstOrCreate(
             ['user_id' => $user->id],
-            ['branch_id' => $user->branch_id]
+            [
+                'branch_id' => $user->branch_id,
+                'first_name' => Str::of($user->name)->before(' ')->value() ?? $user->name,
+                'last_name' => Str::of($user->name)->after(' ')->value(),
+                'employee_id' => sprintf('EMP-%06d', $user->id),
+                'joining_date' => $user->created_at?->toDateString() ?? now()->toDateString(),
+                'effective_from' => $user->created_at?->toDateString() ?? now()->toDateString(),
+            ]
         );
 
         $image = $data['profile_image_path'] ?? null;
@@ -171,19 +193,23 @@ class Settings extends Page implements Forms\Contracts\HasForms
                 Storage::makeDirectory('hr-signatures');
             }
 
-            $sourcePath = $signatureData;
             $targetPath = 'hr-signatures/hr-signature.png';
 
-            if (Storage::exists($sourcePath)) {
-                Storage::copy($sourcePath, $targetPath);
-
-                Notification::make()
-                    ->title('HR signature updated successfully')
-                    ->success()
-                    ->send();
+            if (Storage::exists($signatureData)) {
+                Storage::put($targetPath, Storage::get($signatureData));
+                Storage::delete($signatureData);
             }
+
+            foreach (Storage::files('hr-signatures') as $file) {
+                if ($file !== $targetPath) {
+                    Storage::delete($file);
+                }
+            }
+
+            Notification::make()
+                ->title('HR signature updated successfully')
+                ->success()
+                ->send();
         }
     }
 }
-
-
