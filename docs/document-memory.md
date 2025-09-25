@@ -11,6 +11,8 @@ This log captures the key actions completed during the current documentation pas
 - Extended KYC verification admin form to manage the National ID image without requiring new migrations.
 - Added National ID preview to the KYC verification view page so admins can inspect uploaded IDs directly.
 - Adjusted KYC verification image thumbnails (profile & national ID) to use signed routes so previews render correctly.
+- Fixed HR Fill KYC workflow by auto-generating an `employee_id` before creating employee profiles.
+- Ensured Filament uploads for HR/admin KYC use the `private` disk so image links resolve via the secure download route.
 
 ## Notes for Future Sessions
 - Address the routing gap for `OnboardingInvite::getInviteUrlAttribute` before relying on invite-generated URLs.

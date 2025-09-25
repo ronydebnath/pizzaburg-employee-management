@@ -282,11 +282,13 @@ class OnboardingInviteResource extends Resource
                                 Forms\Components\FileUpload::make('profile_photo')
                                     ->label('Upload Profile Photo')
                                     ->image()
+                                    ->disk('private')
                                     ->directory('kyc/profiles')
                                     ->visibility('private'),
                                 Forms\Components\FileUpload::make('national_id_photo')
                                     ->label('Upload National ID')
                                     ->image()
+                                    ->disk('private')
                                     ->directory('kyc/documents')
                                     ->visibility('private')
                                     ->helperText('Upload a clear image of the employee\'s national ID (front side).'),
@@ -339,7 +341,9 @@ class OnboardingInviteResource extends Resource
                                 'status' => 'active',
                             ]
                         );
-                        
+
+                        $generatedEmployeeId = sprintf('EMP-%06d', $user->id);
+
                         \App\Models\EmployeeProfile::updateOrCreate(
                             ['user_id' => $user->id],
                             [
@@ -348,6 +352,7 @@ class OnboardingInviteResource extends Resource
                                 'first_name' => $data['first_name'],
                                 'last_name' => $data['last_name'],
                                 'date_of_birth' => $data['date_of_birth'],
+                                'employee_id' => $generatedEmployeeId,
                                 'joining_date' => now()->toDateString(),
                                 'effective_from' => now()->toDateString(),
                                 'meta' => [
